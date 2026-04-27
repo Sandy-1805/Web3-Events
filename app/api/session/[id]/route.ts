@@ -1,16 +1,15 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/index';
-import { speakers } from '@/lib/db/schema';
+import { sessions, questions } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key');
 
-async function verifyAdmin() {
+async function isAdmin() {
   const cookieStore = await cookies();
   const token = cookieStore.get('token');
-
   if (!token) return false;
   try {
     const { payload } = await jwtVerify(token.value, secret);
@@ -20,64 +19,69 @@ async function verifyAdmin() {
   }
 }
 
-// Ajoutez GET au début du fichier
+// GET - Détail d'une session
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const speaker = await db.select().from(speakers).where(eq(speakers.id, parseInt(params.id)));
+    const session = await db.select().from(sessions).where(eq(sessions.id, parseInt(params.id)));
 
-    if (speaker.length === 0) {
-      return NextResponse.json({ error: 'Intervenant non trouvé' }, { status: 404 });
+    if (session.length === 0) {
+      return NextResponse.json({ error: 'Session non trouvée' }, { status: 404 });
     }
 
-    return NextResponse.json(speaker[0]);
+    return NextResponse.json(session[0]);
   } catch (error) {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
 
-// Ajoutez PUT avant le DELETE
+// PUT - Modifier une session (admin uniquement)
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const isAdmin = await verifyAdmin();
-  if (!isAdmin) {
+  if (!await isAdmin()) {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
   }
 
   try {
     const body = await request.json();
-    const { name, bio, photo, socialLinks } = body;
+    const { title, description, startTime, endTime, room, capacity, eventId } = body;
 
-    const [updatedSpeaker] = await db.update(speakers)
-      .set({ name, bio, photo, socialLinks })
-      .where(eq(speakers.id, parseInt(params.id)))
+    const [updatedSession] = await db.update(sessions)
+      .set({
+        title,
+        description,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        room,
+        capacity,
+        eventId,
+      })
+      .where(eq(sessions.id, parseInt(params.id)))
       .returning();
 
-    return NextResponse.json(updatedSpeaker);
+    return NextResponse.json(updatedSession);
   } catch (error) {
     return NextResponse.json({ error: 'Erreur lors de la modification' }, { status: 500 });
   }
 }
 
-
+// DELETE - Supprimer une session (admin uniquement)
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const isAdmin = await verifyAdmin();
-  if (!isAdmin) {
+  if (!await isAdmin()) {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
   }
 
   try {
-    await db.delete(speakers).where(eq(speakers.id, parseInt(params.id)));
+    await db.delete(sessions).where(eq(sessions.id, parseInt(params.id)));
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Erreur:', error);
     return NextResponse.json({ error: 'Erreur lors de la suppression' }, { status: 500 });
   }
 }

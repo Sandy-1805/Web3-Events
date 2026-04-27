@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/index';
-import { events } from '@/lib/db/schema';
+import { sessions } from '@/lib/db/schema';
 import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key');
 
-async function verifyAdmin() {
+async function isAdmin() {
   const cookieStore = await cookies();
   const token = cookieStore.get('token');
-
   if (!token) return false;
   try {
     const { payload } = await jwtVerify(token.value, secret);
@@ -19,39 +18,38 @@ async function verifyAdmin() {
   }
 }
 
-// GET - Public (accessible sans authentification)
+// GET - Liste des sessions
 export async function GET() {
   try {
-    const allEvents = await db.select().from(events);
-    return NextResponse.json(allEvents);
+    const allSessions = await db.select().from(sessions);
+    return NextResponse.json(allSessions);
   } catch (error) {
-    console.error('Erreur:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
 
-// POST - Admin uniquement
+// POST - Créer une session (admin uniquement)
 export async function POST(request: Request) {
-  const isAdmin = await verifyAdmin();
-  if (!isAdmin) {
+  if (!await isAdmin()) {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
   }
 
   try {
     const body = await request.json();
-    const { title, description, startDate, endDate, location } = body;
+    const { title, description, startTime, endTime, room, capacity, eventId } = body;
 
-    const [newEvent] = await db.insert(events).values({
+    const [newSession] = await db.insert(sessions).values({
       title,
       description,
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
-      location,
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+      room,
+      capacity,
+      eventId,
     }).returning();
 
-    return NextResponse.json(newEvent, { status: 201 });
+    return NextResponse.json(newSession, { status: 201 });
   } catch (error) {
-    console.error('Erreur:', error);
     return NextResponse.json({ error: 'Erreur lors de la création' }, { status: 500 });
   }
 }
