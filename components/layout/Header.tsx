@@ -2,9 +2,33 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, fetchUser } = useAuth();
+  const pathname = usePathname();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    fetchUser();
+  }, [pathname, fetchUser]);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    const startTime = Date.now();
+    
+    await logout();
+    
+    // Attendre au moins 500ms pour voir l'animation
+    const elapsedTime = Date.now() - startTime;
+    const minLoadingTime = 500;
+    const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+    
+    setTimeout(() => {
+      setIsLoggingOut(false);
+    }, remainingTime);
+  };
 
   return (
     <header className="bg-white shadow-md">
@@ -31,10 +55,18 @@ export default function Header() {
                   Bonjour, {user.name}
                 </span>
                 <button
-                  onClick={logout}
-                  className="text-red-600 hover:text-red-700 transition"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="cursor-pointer bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  Déconnexion
+                  {isLoggingOut ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Déconnexion...
+                    </>
+                  ) : (
+                    'Déconnexion'
+                  )}
                 </button>
               </div>
             ) : (
