@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, integer, boolean } from 'drizzle-orm/pg-core';
 
 export const events = pgTable('events', {
   id: serial('id').primaryKey(),
@@ -10,12 +10,29 @@ export const events = pgTable('events', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+
 export const speakers = pgTable('speakers', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   photo: text('photo'),
   bio: text('bio'),
   socialLinks: text('social_links'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  password: text('password').notNull(),
+  role: text('role').notNull().default('participant'), // 'admin' ou 'participant'
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const favorites = pgTable('favorites', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull(),
+  sessionId: integer('session_id').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
 });
 
