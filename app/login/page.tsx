@@ -10,7 +10,6 @@ export default function LoginPage() {
     name: '',
     email: '',
     password: '',
-    role: 'participant',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,10 +21,14 @@ export default function LoginPage() {
 
     try {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const payload = isLogin
+        ? { email: formData.email, password: formData.password }
+        : { name: formData.name, email: formData.email, password: formData.password };
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -48,11 +51,15 @@ export default function LoginPage() {
     }
   };
 
+  const fillCredentials = (email: string, password: string) => {
+    setFormData({ ...formData, email, password });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {isLogin ? 'Connectez-vous' : 'Inscription'}
+          {isLogin ? 'Connexion à EventSync' : 'Inscription'}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           {isLogin ? "Pas de compte ?" : "Déjà un compte ?"}
@@ -60,7 +67,7 @@ export default function LoginPage() {
             onClick={() => setIsLogin(!isLogin)}
             className="ml-1 font-medium text-blue-600 hover:text-blue-500"
           >
-            {isLogin ? 'Inscrivez-vous' : 'Connectez-vous'}
+            {isLogin ? "S'inscrire" : 'Se connecter'}
           </button>
         </p>
       </div>
@@ -115,34 +122,6 @@ export default function LoginPage() {
               />
             </div>
 
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Rôle
-                </label>
-                <div className="mt-2 space-x-4">
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      value="participant"
-                      checked={formData.role === 'participant'}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    />
-                    <span className="ml-2">Participant</span>
-                  </label>
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      value="admin"
-                      checked={formData.role === 'admin'}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    />
-                    <span className="ml-2">Organisateur</span>
-                  </label>
-                </div>
-              </div>
-            )}
-
             <button
               type="submit"
               disabled={loading}
@@ -151,6 +130,32 @@ export default function LoginPage() {
               {loading ? 'Chargement...' : (isLogin ? 'Se connecter' : "S'inscrire")}
             </button>
           </form>
+
+          {isLogin && (
+            <div className="mt-6">
+              <div className="relative">
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">
+                    Comptes de démonstration
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4 space-y-2">
+                <button
+                  onClick={() => fillCredentials('admin@eventsync.com', 'admin123')}
+                  className="w-full text-left px-3 py-2 text-sm bg-gray-50 rounded hover:bg-gray-100"
+                >
+                  🔐 Admin : admin@eventsync.com / admin123
+                </button>
+                <button
+                  onClick={() => fillCredentials('participant@eventsync.com', 'participant123')}
+                  className="w-full text-left px-3 py-2 text-sm bg-gray-50 rounded hover:bg-gray-100"
+                >
+                  👤 Participant : participant@eventsync.com / participant123
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

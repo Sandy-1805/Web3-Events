@@ -6,7 +6,15 @@ import { eq } from 'drizzle-orm';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, role } = await request.json();
+    const { name, email, password } = await request.json();
+
+    // Empêcher l'inscription avec l'email admin
+    if (email === 'admin@eventsync.com') {
+      return NextResponse.json(
+        { error: 'Cet email est réservé' },
+        { status: 403 }
+      );
+    }
 
     const existingUser = await db.select().from(users).where(eq(users.email, email));
 
@@ -23,7 +31,7 @@ export async function POST(request: Request) {
       name,
       email,
       password: hashedPassword,
-      role: role || 'participant',
+      role: 'participant', // Force le rôle participant
     }).returning();
 
     return NextResponse.json({
@@ -36,7 +44,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json(
-      { error: "Erreur lors de l'inscription" },
+      { error: 'Erreur lors de l\'inscription' },
       { status: 500 }
     );
   }
