@@ -1,1 +1,68 @@
 @import "tailwindcss";
+
+/* ===== EventSync Design System ===== */
+:root {
+  --es-bg-1: #0a0a0f;
+  --es-bg-2: #0d0d14;
+  --es-bg-3: #111118;
+  --es-surface: rgba(255,255,255,0.04);
+  --es-border: rgba(255,255,255,0.08);
+  --es-border-hover: rgba(255,255,255,0.15);
+  --es-text-1: #f1f5f9;
+  --es-text-2: #94a3b8;
+  --es-text-3: #64748b;
+  --es-accent: #6366f1;
+  --es-accent-2: #ec4899;
+  --es-live: #f43f5e;
+  --es-radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--es-bg-1);
+  color: var(--es-text-1);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Events section on homepage */
+.eventsync-events-section {
+  background: #0d0d14;
+  padding: 6rem 2rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.eventsync-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.eventsync-section-header {
+  margin-bottom: 3rem;
+}
+
+.eventsync-section-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6366f1;
+  margin-bottom: 1rem;
+}
+
+.eventsync-section-title {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 800;
+  color: #f1f5f9;
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.eventsync-section-subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+  max-width: 500px;
+  line-height: 1.65;
+  margin: 0;
+}
