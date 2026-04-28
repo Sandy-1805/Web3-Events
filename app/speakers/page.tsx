@@ -8,6 +8,7 @@ interface Speaker {
   name: string;
   bio: string;
   photo: string;
+  socialLinks: string;
 }
 
 export default function SpeakersPage() {
@@ -17,7 +18,7 @@ export default function SpeakersPage() {
   useEffect(() => {
     fetch('/api/speakers')
       .then(res => {
-        if (!res.ok) throw new Error('Non autorisé');
+        if (!res.ok) throw new Error('Erreur chargement');
         return res.json();
       })
       .then(setSpeakers)
@@ -58,11 +59,13 @@ export default function SpeakersPage() {
             {speakers.map((speaker) => (
               <Link href={`/speakers/${speaker.id}`} key={speaker.id}>
                 <div className="group bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
-                  <div className="text-4xl mb-4">🎤</div>
-                  <h2 className="text-xl font-semibold text-white mb-2 group-hover:text-[#a5b4fc] transition">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-[#6366f1] to-[#ec4899] flex items-center justify-center text-3xl">
+                    🎤
+                  </div>
+                  <h2 className="text-xl font-semibold text-white mb-2 text-center group-hover:text-[#a5b4fc] transition">
                     {speaker.name}
                   </h2>
-                  <p className="text-gray-400 text-sm line-clamp-3">
+                  <p className="text-gray-400 text-sm line-clamp-3 text-center">
                     {speaker.bio || 'Bio à venir'}
                   </p>
                 </div>

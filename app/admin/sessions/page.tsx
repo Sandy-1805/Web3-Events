@@ -1,11 +1,11 @@
-// app/admin/sessions/page.tsx
+// app/admin/sessions/page.tsx - version thème sombre
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import ConfirmModal from '@/components/ui/ConfirmModal';  // ← Import du modal
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface Session {
   id: number;
@@ -30,15 +30,9 @@ export default function AdminSessionsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedEventId, setSelectedEventId] = useState<number | 'all'>('all');
-  
-  // États pour la modale
-  const [modalConfig, setModalConfig] = useState<{
-    isOpen: boolean;
-    sessionId: number | null;
-    sessionTitle: string;
-  }>({
+  const [modalConfig, setModalConfig] = useState({
     isOpen: false,
-    sessionId: null,
+    sessionId: null as number | null,
     sessionTitle: '',
   });
 
@@ -77,30 +71,21 @@ export default function AdminSessionsPage() {
     }
   };
 
-  // Ouvrir la modale de confirmation
   const openDeleteModal = (id: number, title: string) => {
-    setModalConfig({
-      isOpen: true,
-      sessionId: id,
-      sessionTitle: title,
-    });
+    setModalConfig({ isOpen: true, sessionId: id, sessionTitle: title });
   };
 
-  // Fermer la modale
   const closeModal = () => {
     setModalConfig({ isOpen: false, sessionId: null, sessionTitle: '' });
   };
 
-  // Confirmer la suppression
   const confirmDelete = async () => {
     if (!modalConfig.sessionId) return;
-
     try {
       const response = await fetch(`/api/session/${modalConfig.sessionId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
       });
-      
       if (response.ok) {
         setSessions(sessions.filter(s => s.id !== modalConfig.sessionId));
       } else {
@@ -120,12 +105,16 @@ export default function AdminSessionsPage() {
     return event ? event.title : `Événement #${eventId}`;
   };
 
-  const filteredSessions = selectedEventId === 'all' 
-    ? sessions 
+  const filteredSessions = selectedEventId === 'all'
+    ? sessions
     : sessions.filter(s => s.eventId === selectedEventId);
 
   if (loading || isLoading) {
-    return <div className="text-center py-12">Chargement...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-[#0a0a0f]">
+        <div className="text-gray-400">Chargement...</div>
+      </div>
+    );
   }
 
   if (!user || user.role !== 'admin') {
@@ -133,27 +122,29 @@ export default function AdminSessionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen bg-[#0a0a0f] py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des sessions</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+            Gestion des sessions
+          </h1>
           <Link
             href="/admin/sessions/create"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
           >
             + Nouvelle session
           </Link>
         </div>
 
         {/* Filtre par événement */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
+          <label className="block text-sm font-medium text-gray-400 mb-2">
             Filtrer par événement
           </label>
           <select
             value={selectedEventId}
             onChange={(e) => setSelectedEventId(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-            className="border border-gray-300 rounded-md px-3 py-2"
+            className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white"
           >
             <option value="all">Tous les événements</option>
             {events.map(event => (
@@ -163,30 +154,30 @@ export default function AdminSessionsPage() {
         </div>
 
         {filteredSessions.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <p className="text-gray-500 text-lg">Aucune session pour le moment</p>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
+            <p className="text-gray-400 text-lg">Aucune session pour le moment</p>
             <Link
               href="/admin/sessions/create"
-              className="mt-4 inline-block text-blue-600 hover:underline"
+              className="mt-4 inline-block text-[#6366f1] hover:underline"
             >
               Créer la première session
             </Link>
           </div>
         ) : (
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
+          <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+            <ul className="divide-y divide-white/10">
               {filteredSessions.map((session) => (
-                <li key={session.id} className="px-6 py-4 hover:bg-gray-50 transition">
+                <li key={session.id} className="px-6 py-4 hover:bg-white/5 transition">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-medium text-gray-900">{session.title}</h3>
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        <h3 className="text-lg font-medium text-white">{session.title}</h3>
+                        <span className="text-xs bg-white/10 text-gray-400 px-2 py-1 rounded">
                           {getEventTitle(session.eventId)}
                         </span>
                       </div>
                       {session.description && (
-                        <p className="text-gray-600 text-sm mb-2 line-clamp-2">{session.description}</p>
+                        <p className="text-gray-400 text-sm mb-2 line-clamp-2">{session.description}</p>
                       )}
                       <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                         <span>📅 {new Date(session.startTime).toLocaleString('fr-FR')}</span>
@@ -198,13 +189,13 @@ export default function AdminSessionsPage() {
                     <div className="flex space-x-2 ml-4">
                       <Link
                         href={`/admin/sessions/${session.id}/edit`}
-                        className="text-blue-600 hover:text-blue-800 px-3 py-1 text-sm font-medium"
+                        className="text-[#a5b4fc] hover:text-white px-3 py-1 text-sm font-medium transition"
                       >
                         Modifier
                       </Link>
                       <button
                         onClick={() => openDeleteModal(session.id, session.title)}
-                        className="text-red-600 hover:text-red-800 px-3 py-1 text-sm font-medium"
+                        className="text-red-400 hover:text-red-300 px-3 py-1 text-sm font-medium transition"
                       >
                         Supprimer
                       </button>
@@ -217,7 +208,6 @@ export default function AdminSessionsPage() {
         )}
       </div>
 
-      {/* Modale de confirmation */}
       <ConfirmModal
         isOpen={modalConfig.isOpen}
         title="Confirmer la suppression"

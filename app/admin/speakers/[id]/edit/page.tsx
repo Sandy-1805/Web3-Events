@@ -4,28 +4,25 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { fr } from 'date-fns/locale';
 
-export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
+export default function EditSpeakerPage({ params }: { params: Promise<{ id: string }> }) {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [eventId, setEventId] = useState<string | null>(null);
+  const [speakerId, setSpeakerId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    startDate: new Date(),
-    endDate: new Date(),
-    location: '',
+    name: '',
+    bio: '',
+    photo: '',
+    socialLinks: '',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Récupérer l'ID de manière asynchrone (Next.js 16)
   useEffect(() => {
     params.then((resolvedParams) => {
-      setEventId(resolvedParams.id);
+      setSpeakerId(resolvedParams.id);
     });
   }, [params]);
 
@@ -36,27 +33,27 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user?.role === 'admin' && eventId) {
-      fetchEvent();
+    if (user?.role === 'admin' && speakerId) {
+      fetchSpeaker();
     }
-  }, [user, eventId]);
+  }, [user, speakerId]);
 
-  const fetchEvent = async () => {
-    if (!eventId) return;
+  const fetchSpeaker = async () => {
+    if (!speakerId) return;
+
     try {
-      const response = await fetch(`/api/events/${eventId}`);
+      const response = await fetch(`/api/speakers/${speakerId}`);
       if (!response.ok) throw new Error('Erreur chargement');
       const data = await response.json();
       setFormData({
-        title: data.title,
-        description: data.description || '',
-        startDate: new Date(data.startDate),
-        endDate: new Date(data.endDate),
-        location: data.location || '',
+        name: data.name || '',
+        bio: data.bio || '',
+        photo: data.photo || '',
+        socialLinks: data.socialLinks || '',
       });
     } catch (error) {
       console.error('Erreur:', error);
-      setError('Impossible de charger l\'événement');
+      setError('Impossible de charger l\'intervenant');
     } finally {
       setIsLoading(false);
     }
@@ -67,29 +64,23 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     setError('');
     setIsSubmitting(true);
 
-    if (formData.startDate >= formData.endDate) {
-      setError('La date de fin doit être postérieure à la date de début');
+    if (!formData.name.trim()) {
+      setError('Le nom est obligatoire');
       setIsSubmitting(false);
       return;
     }
 
-    if (!eventId) {
-      setError('ID de événement invalide');
+    if (!speakerId) {
+      setError('ID de l\'intervenant invalide');
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const response = await fetch(`/api/events/${eventId}`, {
+      const response = await fetch(`/api/speakers/${speakerId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          startDate: formData.startDate.toISOString(),
-          endDate: formData.endDate.toISOString(),
-          location: formData.location,
-        }),
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
@@ -97,7 +88,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         throw new Error(data.error || 'Erreur lors de la modification');
       }
 
-      router.push('/admin/events');
+      router.push('/admin/speakers');
       router.refresh();
     } catch (err: any) {
       setError(err.message);
@@ -122,13 +113,13 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     <div className="min-h-screen bg-[#0a0a0f] py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Link href="/admin/events" className="text-[#6366f1] hover:underline">
+          <Link href="/admin/speakers" className="text-[#6366f1] hover:underline">
             ← Retour à la liste
           </Link>
         </div>
 
         <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-          <h1 className="text-2xl font-bold text-white mb-6">Modifier l'événement</h1>
+          <h1 className="text-2xl font-bold text-white mb-6">Modifier l'intervenant</h1>
 
           {error && (
             <div className="mb-4 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg">
@@ -139,83 +130,77 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">
-                Titre *
+                Nom complet *
               </label>
               <input
                 type="text"
                 required
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">
-                Description
+                Biographie
               </label>
               <textarea
-                rows={4}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={5}
+                value={formData.bio}
+                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                 className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
+                placeholder="Présentation de l'intervenant, son parcours, ses expertises..."
               />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Date de début *
-                </label>
-                <DatePicker
-                  selected={formData.startDate}
-                  onChange={(date) => setFormData({ ...formData, startDate: date || new Date() })}
-                  showTimeSelect
-                  dateFormat="dd/MM/yyyy HH:mm"
-                  timeFormat="HH:mm"
-                  timeIntervals={15}
-                  timeCaption="Heure"
-                  locale={fr}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
-                  wrapperClassName="w-full"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Date de fin *
-                </label>
-                <DatePicker
-                  selected={formData.endDate}
-                  onChange={(date) => setFormData({ ...formData, endDate: date || new Date() })}
-                  showTimeSelect
-                  dateFormat="dd/MM/yyyy HH:mm"
-                  timeFormat="HH:mm"
-                  timeIntervals={15}
-                  timeCaption="Heure"
-                  locale={fr}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
-                  wrapperClassName="w-full"
-                  minDate={formData.startDate}
-                />
-              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {formData.bio.length} caractères
+              </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1">
-                Lieu
+                URL de la photo
+              </label>
+              <input
+                type="url"
+                value={formData.photo}
+                onChange={(e) => setFormData({ ...formData, photo: e.target.value })}
+                className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
+                placeholder="https://exemple.com/photo.jpg"
+              />
+              {formData.photo && (
+                <div className="mt-2">
+                  <img
+                    src={formData.photo}
+                    alt={formData.name}
+                    className="w-20 h-20 rounded-full object-cover border border-white/20"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">
+                Liens sociaux (JSON)
               </label>
               <input
                 type="text"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                value={formData.socialLinks}
+                onChange={(e) => setFormData({ ...formData, socialLinks: e.target.value })}
                 className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
+                placeholder='{"twitter": "https://twitter.com/...", "linkedin": "https://linkedin.com/..."}'
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Format JSON : {`{"twitter": "url", "linkedin": "url", "github": "url"}`}
+              </p>
             </div>
 
             <div className="flex justify-end space-x-3">
               <Link
-                href="/admin/events"
+                href="/admin/speakers"
                 className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
               >
                 Annuler
@@ -223,7 +208,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition"
+                className="px-4 py-2 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition"
               >
                 {isSubmitting ? 'Sauvegarde...' : 'Sauvegarder'}
               </button>

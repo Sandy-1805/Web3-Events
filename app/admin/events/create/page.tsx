@@ -4,6 +4,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { fr } from 'date-fns/locale';
 
 export default function CreateEventPage() {
   const { user, loading } = useAuth();
@@ -11,8 +14,8 @@ export default function CreateEventPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    startDate: '',
-    endDate: '',
+    startDate: new Date(),
+    endDate: new Date(Date.now() + 3600000),
     location: '',
   });
   const [error, setError] = useState('');
@@ -29,11 +32,23 @@ export default function CreateEventPage() {
     setError('');
     setIsSubmitting(true);
 
+    if (formData.startDate >= formData.endDate) {
+      setError('La date de fin doit être postérieure à la date de début');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          startDate: formData.startDate.toISOString(),
+          endDate: formData.endDate.toISOString(),
+          location: formData.location,
+        }),
       });
 
       if (!response.ok) {
@@ -105,30 +120,41 @@ export default function CreateEventPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Date de début *
+                  Date et heure de début *
                 </label>
-                <input
-                  type="datetime-local"
-                  required
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
+                <DatePicker
+                  selected={formData.startDate}
+                  onChange={(date) => setFormData({ ...formData, startDate: date || new Date() })}
+                  showTimeSelect
+                  dateFormat="dd/MM/yyyy HH:mm"
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  timeCaption="Heure"
+                  locale={fr}
+                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
+                  wrapperClassName="w-full"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Date de fin *
+                  Date et heure de fin *
                 </label>
-                <input
-                  type="datetime-local"
-                  required
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
+                <DatePicker
+                  selected={formData.endDate}
+                  onChange={(date) => setFormData({ ...formData, endDate: date || new Date() })}
+                  showTimeSelect
+                  dateFormat="dd/MM/yyyy HH:mm"
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  timeCaption="Heure"
+                  locale={fr}
+                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
+                  wrapperClassName="w-full"
+                  minDate={formData.startDate}
                 />
               </div>
             </div>

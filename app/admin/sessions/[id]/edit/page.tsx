@@ -1,17 +1,18 @@
-// app/admin/sessions/[id]/edit/page.tsx
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { fr } from 'date-fns/locale';
 
 interface Event {
   id: number;
   title: string;
 }
 
-// IMPORTANT: params est une Promise dans Next.js 16
 export default function EditSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -20,8 +21,8 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    startTime: '',
-    endTime: '',
+    startTime: new Date(),
+    endTime: new Date(),
     room: '',
     capacity: '',
     eventId: '',
@@ -30,7 +31,6 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Récupérer l'ID de manière asynchrone
   useEffect(() => {
     params.then((resolvedParams) => {
       setSessionId(resolvedParams.id);
@@ -62,18 +62,15 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
   const fetchSession = async () => {
     if (!sessionId) return;
-    
     try {
       const response = await fetch(`/api/session/${sessionId}`);
-      if (!response.ok) {
-        throw new Error('Erreur chargement session');
-      }
+      if (!response.ok) throw new Error('Erreur chargement session');
       const data = await response.json();
       setFormData({
         title: data.title,
         description: data.description || '',
-        startTime: new Date(data.startTime).toISOString().slice(0, 16),
-        endTime: new Date(data.endTime).toISOString().slice(0, 16),
+        startTime: new Date(data.startTime),
+        endTime: new Date(data.endTime),
         room: data.room,
         capacity: data.capacity || '',
         eventId: data.eventId.toString(),
@@ -103,27 +100,26 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
       return;
     }
 
-    const payload = {
-      title: formData.title,
-      description: formData.description || null,
-      startTime: formData.startTime,
-      endTime: formData.endTime,
-      room: formData.room,
-      capacity: formData.capacity ? parseInt(formData.capacity) : null,
-      eventId: parseInt(formData.eventId),
-    };
-
-    console.log('📤 Envoi modification - Session ID:', sessionId);
-    console.log('📤 Payload:', payload);
+    if (formData.startTime >= formData.endTime) {
+      setError('L\'heure de fin doit être postérieure à l\'heure de début');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch(`/api/session/${sessionId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description || null,
+          startTime: formData.startTime.toISOString(),
+          endTime: formData.endTime.toISOString(),
+          room: formData.room,
+          capacity: formData.capacity ? parseInt(formData.capacity) : null,
+          eventId: parseInt(formData.eventId),
+        }),
       });
-
-      console.log('📥 Status réponse:', response.status);
 
       if (!response.ok) {
         const data = await response.json();
@@ -133,7 +129,6 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
       router.push('/admin/sessions');
       router.refresh();
     } catch (err: any) {
-      console.error('❌ Erreur:', err);
       setError(err.message);
     } finally {
       setIsSubmitting(false);
@@ -141,7 +136,11 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   };
 
   if (loading || isLoading) {
-    return <div className="text-center py-12">Chargement...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-[#0a0a0f]">
+        <div className="text-gray-400">Chargement...</div>
+      </div>
+    );
   }
 
   if (!user || user.role !== 'admin') {
@@ -149,33 +148,33 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen bg-[#0a0a0f] py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Link href="/admin/sessions" className="text-blue-600 hover:underline">
+          <Link href="/admin/sessions" className="text-[#6366f1] hover:underline">
             ← Retour à la liste
           </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Modifier la session</h1>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+          <h1 className="text-2xl font-bold text-white mb-6">Modifier la session</h1>
 
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="mb-4 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-400 mb-1">
                 Événement *
               </label>
               <select
                 required
                 value={formData.eventId}
                 onChange={(e) => setFormData({ ...formData, eventId: e.target.value })}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
               >
                 <option value="">Sélectionner un événement</option>
                 {events.map(event => (
@@ -185,7 +184,7 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-400 mb-1">
                 Titre *
               </label>
               <input
@@ -193,53 +192,64 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-400 mb-1">
                 Description
               </label>
               <textarea
                 rows={4}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-400 mb-1">
                   Date et heure de début *
                 </label>
-                <input
-                  type="datetime-local"
-                  required
-                  value={formData.startTime}
-                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                <DatePicker
+                  selected={formData.startTime}
+                  onChange={(date) => setFormData({ ...formData, startTime: date || new Date() })}
+                  showTimeSelect
+                  dateFormat="dd/MM/yyyy HH:mm"
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  timeCaption="Heure"
+                  locale={fr}
+                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
+                  wrapperClassName="w-full"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-400 mb-1">
                   Date et heure de fin *
                 </label>
-                <input
-                  type="datetime-local"
-                  required
-                  value={formData.endTime}
-                  onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                <DatePicker
+                  selected={formData.endTime}
+                  onChange={(date) => setFormData({ ...formData, endTime: date || new Date() })}
+                  showTimeSelect
+                  dateFormat="dd/MM/yyyy HH:mm"
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  timeCaption="Heure"
+                  locale={fr}
+                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
+                  wrapperClassName="w-full"
+                  minDate={formData.startTime}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-400 mb-1">
                   Salle *
                 </label>
                 <input
@@ -247,19 +257,19 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
                   required
                   value={formData.room}
                   onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-400 mb-1">
                   Capacité (optionnel)
                 </label>
                 <input
                   type="number"
                   value={formData.capacity}
                   onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
                 />
               </div>
             </div>
@@ -267,14 +277,14 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             <div className="flex justify-end space-x-3">
               <Link
                 href="/admin/sessions"
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
               >
                 Annuler
               </Link>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition"
               >
                 {isSubmitting ? 'Sauvegarde...' : 'Sauvegarder'}
               </button>

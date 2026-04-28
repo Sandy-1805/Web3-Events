@@ -2,18 +2,66 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [statsData, setStatsData] = useState({
+    events: 0,
+    sessions: 0,
+    speakers: 0,
+    questions: 0,
+  });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== 'admin')) {
       router.push('/login');
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      fetchStats();
+    }
+  }, [user]);
+
+  const fetchStats = async () => {
+    setIsLoadingStats(true);
+    try {
+      const [eventsRes, sessionsRes, speakersRes, questionsRes] = await Promise.all([
+        fetch('/api/events'),
+        fetch('/api/session'),
+        fetch('/api/speakers'),
+        fetch('/api/questions').catch(() => ({ json: () => [] })),
+      ]);
+
+      const events = await eventsRes.json();
+      const sessions = await sessionsRes.json();
+      const speakers = await speakersRes.json();
+
+      let questions = [];
+      try {
+        const questionsData = await questionsRes.json();
+        questions = Array.isArray(questionsData) ? questionsData : [];
+      } catch {
+        questions = [];
+      }
+
+      setStatsData({
+        events: Array.isArray(events) ? events.length : 0,
+        sessions: Array.isArray(sessions) ? sessions.length : 0,
+        speakers: Array.isArray(speakers) ? speakers.length : 0,
+        questions: questions.length,
+      });
+    } catch (error) {
+      console.error('Erreur chargement stats:', error);
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -48,7 +96,7 @@ export default function AdminDashboard() {
   const stats = [
     {
       name: 'Événements',
-      value: '0',
+      value: isLoadingStats ? '...' : statsData.events.toString(),
       href: '/admin/events',
       icon: '◈',
       color: '#6366f1',
@@ -57,7 +105,7 @@ export default function AdminDashboard() {
     },
     {
       name: 'Sessions',
-      value: '0',
+      value: isLoadingStats ? '...' : statsData.sessions.toString(),
       href: '/admin/sessions',
       icon: '◎',
       color: '#ec4899',
@@ -66,7 +114,7 @@ export default function AdminDashboard() {
     },
     {
       name: 'Intervenants',
-      value: '0',
+      value: isLoadingStats ? '...' : statsData.speakers.toString(),
       href: '/admin/speakers',
       icon: '◉',
       color: '#22d3ee',
@@ -75,7 +123,7 @@ export default function AdminDashboard() {
     },
     {
       name: 'Questions',
-      value: '0',
+      value: isLoadingStats ? '...' : statsData.questions.toString(),
       href: '/admin/questions',
       icon: '◐',
       color: '#a78bfa',
