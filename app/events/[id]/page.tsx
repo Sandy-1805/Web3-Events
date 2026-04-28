@@ -27,7 +27,7 @@ interface Session {
 }
 
 export default function EventDetailPage() {
-  const { user } = useAuth();  // ← Ajout pour savoir si admin
+  const { user } = useAuth();
   const params = useParams();
   const router = useRouter();
   const eventId = params.id as string;
@@ -38,7 +38,7 @@ export default function EventDetailPage() {
   const [error, setError] = useState('');
   const [selectedRoom, setSelectedRoom] = useState<string>('all');
   const [rooms, setRooms] = useState<string[]>([]);
-  const [showSessionForm, setShowSessionForm] = useState(false);  // ← État pour le formulaire
+  const [showSessionForm, setShowSessionForm] = useState(false);
   const [newSession, setNewSession] = useState({
     title: '',
     description: '',
@@ -105,7 +105,6 @@ export default function EventDetailPage() {
   const liveSessions = sortedSessions.filter(isLive);
   const upcomingSessions = sortedSessions.filter(s => !isLive(s));
 
-  // Fonction pour créer une session
   const handleCreateSession = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
@@ -137,7 +136,6 @@ export default function EventDetailPage() {
         throw new Error(data.error || 'Erreur lors de la création');
       }
 
-      // Réinitialiser le formulaire
       setNewSession({
         title: '',
         description: '',
@@ -147,8 +145,6 @@ export default function EventDetailPage() {
         capacity: '',
       });
       setShowSessionForm(false);
-      
-      // Recharger les sessions
       fetchSessions();
       
     } catch (err: any) {
@@ -182,13 +178,12 @@ export default function EventDetailPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Lien retour */}
+        {/* Lien retour et bouton ajout session */}
         <div className="mb-6 flex justify-between items-center">
           <Link href="/events" className="text-[#6366f1] hover:underline">
             ← Retour à la liste des événements
           </Link>
           
-          {/* Bouton Ajouter une session - visible uniquement pour l'admin */}
           {user?.role === 'admin' && (
             <button
               onClick={() => setShowSessionForm(!showSessionForm)}
@@ -199,7 +194,7 @@ export default function EventDetailPage() {
           )}
         </div>
 
-        {/* Formulaire d'ajout de session (admin uniquement) */}
+        {/* Formulaire d'ajout de session */}
         {showSessionForm && user?.role === 'admin' && (
           <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-8">
             <h2 className="text-xl font-bold text-white mb-4">Ajouter une session à "{event.title}"</h2>
@@ -212,9 +207,7 @@ export default function EventDetailPage() {
             
             <form onSubmit={handleCreateSession} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Titre *
-                </label>
+                <label className="block text-sm font-medium text-gray-400 mb-1">Titre *</label>
                 <input
                   type="text"
                   required
@@ -225,9 +218,7 @@ export default function EventDetailPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-400 mb-1">Description</label>
                 <textarea
                   rows={3}
                   value={newSession.description}
@@ -238,9 +229,7 @@ export default function EventDetailPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
-                    Date et heure de début *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Début *</label>
                   <input
                     type="datetime-local"
                     required
@@ -249,11 +238,8 @@ export default function EventDetailPage() {
                     className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
-                    Date et heure de fin *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Fin *</label>
                   <input
                     type="datetime-local"
                     required
@@ -266,28 +252,21 @@ export default function EventDetailPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
-                    Salle *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Salle *</label>
                   <input
                     type="text"
                     required
                     value={newSession.room}
                     onChange={(e) => setNewSession({ ...newSession, room: e.target.value })}
-                    placeholder="Amphi A, Salle 101..."
                     className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
-                    Capacité (optionnel)
-                  </label>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Capacité</label>
                   <input
                     type="number"
                     value={newSession.capacity}
                     onChange={(e) => setNewSession({ ...newSession, capacity: e.target.value })}
-                    placeholder="Nombre de places"
                     className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
                   />
                 </div>
@@ -317,54 +296,35 @@ export default function EventDetailPage() {
         <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden mb-8">
           <div className="p-6">
             <h1 className="text-3xl font-bold text-white mb-4">{event.title}</h1>
-            
             <div className="flex flex-wrap gap-4 mb-4 text-gray-400">
+              <div className="flex items-center gap-2">📅 {new Date(event.startDate).toLocaleDateString('fr-FR')}</div>
               <div className="flex items-center gap-2">
-                <span>📅</span>
-                <span>{new Date(event.startDate).toLocaleDateString('fr-FR')}</span>
+                ⏰ {new Date(event.startDate).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                {' - '}
+                {new Date(event.endDate).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
               </div>
-              <div className="flex items-center gap-2">
-                <span>⏰</span>
-                <span>
-                  {new Date(event.startDate).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                  {' - '}
-                  {new Date(event.endDate).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-              {event.location && (
-                <div className="flex items-center gap-2">
-                  <span>📍</span>
-                  <span>{event.location}</span>
-                </div>
-              )}
+              {event.location && <div className="flex items-center gap-2">📍 {event.location}</div>}
             </div>
-            
-            {event.description && (
-              <p className="text-gray-300 leading-relaxed">{event.description}</p>
-            )}
+            {event.description && <p className="text-gray-300 leading-relaxed">{event.description}</p>}
           </div>
         </div>
 
         {/* Filtre par salle */}
         {rooms.length > 1 && (
           <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              Filtrer par salle
-            </label>
+            <label className="block text-sm font-medium text-gray-400 mb-2">Filtrer par salle</label>
             <select
               value={selectedRoom}
               onChange={(e) => setSelectedRoom(e.target.value)}
               className="bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-white"
             >
               <option value="all">Toutes les salles</option>
-              {rooms.map(room => (
-                <option key={room} value={room}>{room}</option>
-              ))}
+              {rooms.map(room => <option key={room} value={room}>{room}</option>)}
             </select>
           </div>
         )}
 
-        {/* Sessions en cours (Live) */}
+        {/* Sessions en live */}
         {liveSessions.length > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
@@ -382,7 +342,7 @@ export default function EventDetailPage() {
           </div>
         )}
 
-        {/* À venir / Toutes les sessions */}
+        {/* Autres sessions */}
         <div>
           <h2 className="text-2xl font-bold text-white mb-4">
             {liveSessions.length > 0 ? 'À venir' : 'Toutes les sessions'}
@@ -391,10 +351,7 @@ export default function EventDetailPage() {
             <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
               <p className="text-gray-400">Aucune session pour le moment</p>
               {user?.role === 'admin' && !showSessionForm && (
-                <button
-                  onClick={() => setShowSessionForm(true)}
-                  className="mt-4 text-[#6366f1] hover:underline"
-                >
+                <button onClick={() => setShowSessionForm(true)} className="mt-4 text-[#6366f1] hover:underline">
                   Créer la première session
                 </button>
               )}
@@ -412,7 +369,7 @@ export default function EventDetailPage() {
   );
 }
 
-// Composant SessionCard modifié avec bouton supprimer pour admin
+// Composant SessionCard - CORRIGÉ : le Link englobe toute la carte
 function SessionCard({ session, isLive, isAdmin, onSessionDeleted }: { 
   session: Session; 
   isLive: boolean; 
@@ -420,6 +377,7 @@ function SessionCard({ session, isLive, isAdmin, onSessionDeleted }: {
   onSessionDeleted: () => void;
 }) {
   const [deleting, setDeleting] = useState(false);
+  const router = useRouter();
 
   const formatTime = (date: string) => {
     return new Date(date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
@@ -429,7 +387,9 @@ function SessionCard({ session, isLive, isAdmin, onSessionDeleted }: {
     return new Date(date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Empêche la navigation
+    e.stopPropagation(); // Empêche la propagation
     if (!confirm(`Supprimer la session "${session.title}" ?`)) return;
     
     setDeleting(true);
@@ -447,8 +407,16 @@ function SessionCard({ session, isLive, isAdmin, onSessionDeleted }: {
     }
   };
 
+  // Fonction pour gérer le clic sur la carte
+  const handleCardClick = () => {
+    router.push(`/sessions/${session.id}`);
+  };
+
   return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all">
+    <div 
+      onClick={handleCardClick}
+      className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer"
+    >
       <div className="flex justify-between items-start mb-2">
         <h3 className="text-lg font-semibold text-white">{session.title}</h3>
         <div className="flex items-center gap-2">
