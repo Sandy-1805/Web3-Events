@@ -19,6 +19,11 @@ export default function AdminEventsPage() {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    eventId: null as number | null,
+    eventTitle: '',
+  });
 
   useEffect(() => {
     if (!loading && (!user || user.role !== 'admin')) {
@@ -36,33 +41,43 @@ export default function AdminEventsPage() {
     try {
       const response = await fetch('/api/events');
       const data = await response.json();
-      console.log('📅 Événements reçus:', data);
       setEvents(data);
     } catch (error) {
-      console.error('❌ Erreur:', error);
+      console.error('Erreur:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const deleteEvent = async (id: number) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) return;
+  const openDeleteModal = (id: number, title: string) => {
+    setModalConfig({ isOpen: true, eventId: id, eventTitle: title });
+  };
+
+  const closeModal = () => {
+    setModalConfig({ isOpen: false, eventId: null, eventTitle: '' });
+  };
+
+  const confirmDelete = async () => {
+    if (!modalConfig.eventId) return;
 
     try {
-      const response = await fetch(`/api/events/${id}`, { method: 'DELETE' });
+      const response = await fetch(`/api/events/${modalConfig.eventId}`, { method: 'DELETE' });
       if (response.ok) {
-        setEvents(events.filter(e => e.id !== id));
-        console.log(`✅ Événement ${id} supprimé`);
+        setEvents(events.filter(e => e.id !== modalConfig.eventId));
+      } else {
+        alert('Erreur lors de la suppression');
       }
     } catch (error) {
-      console.error('❌ Erreur lors de la suppression:', error);
+      console.error('Erreur:', error);
+    } finally {
+      closeModal();
     }
   };
 
   if (loading || isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-xl text-gray-600">Chargement...</div>
+      <div className="flex justify-center items-center min-h-screen bg-[#0a0a0f]">
+        <div className="text-gray-400">Chargement...</div>
       </div>
     );
   }
@@ -72,66 +87,102 @@ export default function AdminEventsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen bg-[#0a0a0f] py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Gestion des événements</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+            Gestion des événements
+          </h1>
           <Link
             href="/admin/events/create"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
           >
             + Nouvel événement
           </Link>
         </div>
 
         {events.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <p className="text-gray-500 text-lg">Aucun événement pour le moment</p>
-            <Link
-              href="/admin/events/create"
-              className="mt-4 inline-block text-blue-600 hover:underline"
-            >
+          <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
+            <p className="text-gray-400">Aucun événement pour le moment</p>
+            <Link href="/admin/events/create" className="mt-4 inline-block text-[#6366f1] hover:underline">
               Créer le premier événement
             </Link>
           </div>
         ) : (
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {events.map((event) => (
-                <li key={event.id} className="px-6 py-4 hover:bg-gray-50 transition">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">{event.title}</h3>
-                      {event.description && (
-                        <p className="text-gray-600 text-sm mt-1 line-clamp-2">{event.description}</p>
-                      )}
-                      <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-500">
-                        <span>📅 {new Date(event.startDate).toLocaleString('fr-FR')}</span>
-                        <span>⏱️ Fin: {new Date(event.endDate).toLocaleString('fr-FR')}</span>
-                        {event.location && <span>📍 {event.location}</span>}
+          <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-white/10">
+                <tr>
+                  <th className="text-left p-4 text-gray-400 font-medium">Titre</th>
+                  <th className="text-left p-4 text-gray-400 font-medium">Dates</th>
+                  <th className="text-left p-4 text-gray-400 font-medium">Lieu</th>
+                  <th className="text-left p-4 text-gray-400 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/10">
+                {events.map((event) => (
+                  <tr key={event.id} className="hover:bg-white/5 transition">
+                    <td className="p-4 text-white">{event.title}</td>
+                    <td className="p-4 text-gray-400 text-sm">
+                      {new Date(event.startDate).toLocaleDateString('fr-FR')}
+                    </td>
+                    <td className="p-4 text-gray-400 text-sm">{event.location || '—'}</td>
+                    <td className="p-4">
+                      <div className="flex space-x-3">
+                        <Link
+                          href={`/admin/events/${event.id}/edit`}
+                          className="text-[#a5b4fc] hover:text-white transition"
+                        >
+                          Modifier
+                        </Link>
+                        <button
+                          onClick={() => openDeleteModal(event.id, event.title)}
+                          className="text-red-400 hover:text-red-300 transition"
+                        >
+                          Supprimer
+                        </button>
                       </div>
-                    </div>
-                    <div className="flex space-x-2 ml-4">
-                      <Link
-                        href={`/admin/events/${event.id}/edit`}
-                        className="text-blue-600 hover:text-blue-800 px-3 py-1 text-sm font-medium"
-                      >
-                        Modifier
-                      </Link>
-                      <button
-                        onClick={() => deleteEvent(event.id)}
-                        className="text-red-600 hover:text-red-800 px-3 py-1 text-sm font-medium"
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
+
+      {/* Modale */}
+      {modalConfig.isOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-[#0d0d14] border border-white/10 rounded-xl p-6 max-w-md w-full mx-4">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 mx-auto bg-red-500/20 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Confirmer la suppression</h3>
+              <p className="text-gray-400">
+                Êtes-vous sûr de vouloir supprimer "{modalConfig.eventTitle}" ? Cette action est irréversible.
+              </p>
+            </div>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 hover:bg-red-500/30 transition"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

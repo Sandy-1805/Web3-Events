@@ -24,10 +24,9 @@ export default function EventsPage() {
     try {
       const response = await fetch('/api/events');
       const data = await response.json();
-      console.log('📅 Événements publics:', data);
       setEvents(data);
     } catch (error) {
-      console.error('❌ Erreur:', error);
+      console.error('Erreur:', error);
     } finally {
       setLoading(false);
     }
@@ -36,52 +35,60 @@ export default function EventsPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="text-xl text-gray-500">Chargement des événements...</div>
+        <div className="text-gray-400">Chargement des événements...</div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Tous les événements</h1>
-      <p className="text-lg text-gray-600 mb-8">Découvrez nos prochains événements</p>
-
-      {events.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <p className="text-gray-500 text-lg">Aucun événement à venir</p>
-          <p className="text-gray-400 mt-2">Revenez plus tard pour découvrir nos prochains événements</p>
+    <div className="min-h-screen py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* En-tête */}
+        <div className="text-center mb-12">
+          <span className="inline-block text-sm font-bold tracking-wider text-[#6366f1] uppercase mb-3">
+            Découvrir
+          </span>
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-4">
+            Tous nos événements
+          </h1>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Des rencontres uniques pour explorer les technologies émergentes et échanger avec des experts passionnés.
+          </p>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event) => (
-            <Link href={`/events/${event.id}`} key={event.id}>
-              <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer overflow-hidden">
-                <div className="p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2 line-clamp-1">
+
+        {/* Grille des événements */}
+        {events.length === 0 ? (
+          <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
+            <p className="text-gray-400">Aucun événement à venir</p>
+            <p className="text-gray-500 text-sm mt-2">Revenez plus tard pour découvrir nos prochains événements</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event) => (
+              <Link href={`/events/${event.id}`} key={event.id}>
+                <div className="group bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="text-4xl">📅</div>
+                    <div className="text-xs text-gray-500">
+                      {new Date(event.startDate).toLocaleDateString('fr-FR')}
+                    </div>
+                  </div>
+                  <h2 className="text-xl font-semibold text-white mb-2 group-hover:text-[#a5b4fc] transition">
                     {event.title}
                   </h2>
-                  <p className="text-gray-600 mb-4 line-clamp-2">
+                  <p className="text-gray-400 text-sm line-clamp-2 mb-4">
                     {event.description || 'Aucune description'}
                   </p>
-                  <div className="space-y-1 text-sm text-gray-500">
-                    <p className="flex items-center gap-2">
-                      📅 {new Date(event.startDate).toLocaleDateString('fr-FR')}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      ⏰ {new Date(event.startDate).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    {event.location && (
-                      <p className="flex items-center gap-2">
-                        📍 {event.location}
-                      </p>
-                    )}
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <span>📍</span>
+                    <span>{event.location || 'Lieu non spécifié'}</span>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

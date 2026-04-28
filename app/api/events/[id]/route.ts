@@ -22,15 +22,11 @@ async function verifyAdmin() {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const isAdmin = await verifyAdmin();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-  }
-
   try {
-    const event = await db.select().from(events).where(eq(events.id, parseInt(params.id)));
+    const { id } = await params;
+    const event = await db.select().from(events).where(eq(events.id, parseInt(id)));
 
     if (event.length === 0) {
       return NextResponse.json({ error: 'Événement non trouvé' }, { status: 404 });

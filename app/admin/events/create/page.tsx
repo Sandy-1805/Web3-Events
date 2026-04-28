@@ -42,7 +42,6 @@ export default function CreateEventPage() {
       }
 
       router.push('/admin/events');
-      router.refresh();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -51,7 +50,11 @@ export default function CreateEventPage() {
   };
 
   if (loading) {
-    return <div className="text-center py-12">Chargement...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-[#0a0a0f]">
+        <div className="text-gray-400">Chargement...</div>
+      </div>
+    );
   }
 
   if (!user || user.role !== 'admin') {
@@ -59,26 +62,26 @@ export default function CreateEventPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen bg-[#0a0a0f] py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <Link href="/admin/events" className="text-blue-600 hover:underline">
+          <Link href="/admin/events" className="text-[#6366f1] hover:underline">
             ← Retour à la liste
           </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Créer un événement</h1>
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+          <h1 className="text-2xl font-bold text-white mb-6">Créer un événement</h1>
 
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="mb-4 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-400 mb-1">
                 Titre *
               </label>
               <input
@@ -86,25 +89,25 @@ export default function CreateEventPage() {
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-400 mb-1">
                 Description
               </label>
               <textarea
                 rows={4}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-400 mb-1">
                   Date de début *
                 </label>
                 <input
@@ -112,12 +115,12 @@ export default function CreateEventPage() {
                   required
                   value={formData.startDate}
                   onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-400 mb-1">
                   Date de fin *
                 </label>
                 <input
@@ -125,34 +128,34 @@ export default function CreateEventPage() {
                   required
                   value={formData.endDate}
                   onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-400 mb-1">
                 Lieu
               </label>
               <input
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
               />
             </div>
 
             <div className="flex justify-end space-x-3">
               <Link
                 href="/admin/events"
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
               >
                 Annuler
               </Link>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition"
               >
                 {isSubmitting ? 'Création...' : 'Créer l\'événement'}
               </button>
