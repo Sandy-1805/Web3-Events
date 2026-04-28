@@ -8,6 +8,13 @@
       "when": 1777271688209,
       "tag": "0000_cultured_the_initiative",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1777281497717,
+      "tag": "0001_complex_wilson_fisk",
+      "breakpoints": true
     }
   ]
 }
