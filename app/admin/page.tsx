@@ -551,10 +551,6 @@ export default function AdminDashboard() {
         <header className="es-admin-header">
           <div className="es-admin-header-inner">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <Link href="/" className="es-admin-logo">
-                <div className="es-admin-logo-icon">E</div>
-                <span className="es-admin-logo-text">EventSync</span>
-              </Link>
               <span className="es-admin-badge">
                 <span className="es-live-dot" style={{ background: '#fbbf24' }} />
                 Admin

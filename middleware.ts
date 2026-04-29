@@ -8,13 +8,11 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get('token');
   const { pathname } = request.nextUrl;
 
-  // Pages publiques
-  const publicPaths = ['/login', '/'];
-  const isPublicPath = publicPaths.some(path => pathname === path) ||
-                       pathname.startsWith('/events/') ||
-                       pathname.startsWith('/speakers/');
+  // Pages publiques (accessibles sans connexion)
+  const publicPaths = ['/login'];
+  const isPublicPath = publicPaths.some(path => pathname === path);
 
-  // Si pas de token et chemin non public -> rediriger vers login
+  // Si pas de token et pas sur une page publique -> rediriger vers login
   if (!token && !isPublicPath) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
@@ -25,13 +23,13 @@ export async function middleware(request: NextRequest) {
       const { payload } = await jwtVerify(token.value, secret);
       const userRole = payload.role as string;
 
-      // Routes admin
+      // Routes admin (protégées)
       if (pathname.startsWith('/admin') && userRole !== 'admin') {
-        return NextResponse.redirect(new URL('/', request.url));
+        return NextResponse.redirect(new URL('/login', request.url));
       }
 
-      // Rediriger vers home si déjà connecté sur login
-      if (pathname === '/login' && userRole) {
+      // Si déjà connecté et va sur login -> rediriger vers home ou admin
+      if (pathname === '/login') {
         if (userRole === 'admin') {
           return NextResponse.redirect(new URL('/admin', request.url));
         }
@@ -56,7 +54,8 @@ export const config = {
     '/login',
     '/admin/:path*',
     '/events/:path*',
-    '/speakers/:path*',
     '/favorites',
+    '/speakers/:path*',
+    '/sessions/:path*',
   ],
 };
