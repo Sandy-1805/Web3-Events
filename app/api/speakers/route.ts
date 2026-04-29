@@ -1,3 +1,4 @@
+// app/api/speakers/route.ts
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/index';
 import { speakers } from '@/lib/db/schema';
@@ -19,21 +20,18 @@ async function verifyAdmin() {
   }
 }
 
+// GET - Public (accessible sans authentification) - CORRIGÉ
 export async function GET() {
-  const isAdmin = await verifyAdmin();
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-  }
-
   try {
     const allSpeakers = await db.select().from(speakers);
     return NextResponse.json(allSpeakers);
   } catch (error) {
-    console.error('Erreur:', error);
+    console.error('Erreur GET speakers:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
 
+// POST - Admin uniquement
 export async function POST(request: Request) {
   const isAdmin = await verifyAdmin();
   if (!isAdmin) {
@@ -53,7 +51,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newSpeaker, { status: 201 });
   } catch (error) {
-    console.error('Erreur:', error);
+    console.error('Erreur POST speaker:', error);
     return NextResponse.json({ error: 'Erreur lors de la création' }, { status: 500 });
   }
 }
