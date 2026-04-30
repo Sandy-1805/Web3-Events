@@ -1,8 +1,11 @@
+// app/speakers/page.tsx
+// 🎤 Liste publique des intervenants
+// ACCÈS : public, aucune authentification requise (spec §2.3)
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 interface Speaker {
   id: number;
@@ -12,7 +15,6 @@ interface Speaker {
 }
 
 export default function SpeakersPage() {
-  const router = useRouter();
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -24,15 +26,7 @@ export default function SpeakersPage() {
   const fetchSpeakers = async () => {
     try {
       const response = await fetch('/api/speakers');
-
-      if (response.status === 401) {
-        // Non autorisé -> rediriger vers login
-        router.push('/login');
-        return;
-      }
-
       if (!response.ok) throw new Error('Erreur chargement');
-
       const data = await response.json();
       setSpeakers(data);
     } catch (err) {
@@ -55,8 +49,8 @@ export default function SpeakersPage() {
     return (
       <div className="min-h-screen bg-[#0a0a0f] py-12 text-center">
         <p className="text-red-400">{error}</p>
-        <button onClick={() => router.push('/login')} className="mt-4 text-[#6366f1] hover:underline">
-          Se connecter
+        <button onClick={fetchSpeakers} className="mt-4 text-[#6366f1] hover:underline">
+          Réessayer
         </button>
       </div>
     );
@@ -85,9 +79,21 @@ export default function SpeakersPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {speakers.map((speaker) => (
               <Link href={`/speakers/${speaker.id}`} key={speaker.id}>
-                <div className="group bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-[#6366f1] to-[#ec4899] flex items-center justify-center text-3xl">
-                    🎤
+                <div className="group bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+                  {/* Photo ou avatar par défaut */}
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-[#6366f1] to-[#ec4899] flex items-center justify-center text-3xl overflow-hidden">
+                    {speaker.photo ? (
+                      <img
+                        src={speaker.photo}
+                        alt={speaker.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      '🎤'
+                    )}
                   </div>
                   <h2 className="text-xl font-semibold text-white mb-2 text-center group-hover:text-[#a5b4fc] transition">
                     {speaker.name}
