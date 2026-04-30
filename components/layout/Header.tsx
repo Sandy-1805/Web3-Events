@@ -2,11 +2,13 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/contexts/ThemeContext';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function Header() {
   const { user, loading, logout, fetchUser } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -51,8 +53,8 @@ export default function Header() {
           border-bottom: 1px solid transparent;
         }
         .es-header.scrolled {
-          background: rgba(10,10,15,0.85);
-          border-color: rgba(255,255,255,0.07);
+          background: var(--es-header-bg);
+          border-color: var(--es-border);
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
         }
@@ -86,7 +88,7 @@ export default function Header() {
         .es-logo-text {
           font-size: 1.15rem;
           font-weight: 800;
-          color: #f1f5f9;
+          color: var(--es-text-1);
           letter-spacing: -0.02em;
         }
         .es-nav {
@@ -97,7 +99,7 @@ export default function Header() {
         .es-nav-link {
           font-size: 0.88rem;
           font-weight: 500;
-          color: #64748b;
+          color: var(--es-text-3);
           text-decoration: none;
           padding: 6px 12px;
           border-radius: 8px;
@@ -105,12 +107,12 @@ export default function Header() {
           position: relative;
         }
         .es-nav-link:hover {
-          color: #e2e8f0;
-          background: rgba(255,255,255,0.06);
+          color: var(--es-text-1);
+          background: var(--es-surface);
         }
         .es-nav-link.active {
-          color: #a5b4fc;
-          background: rgba(99,102,241,0.1);
+          color: var(--es-accent);
+          background: var(--es-surface);
         }
         .es-nav-admin {
           font-size: 0.78rem;
@@ -137,11 +139,11 @@ export default function Header() {
         }
         .es-user-greeting {
           font-size: 0.82rem;
-          color: #475569;
+          color: var(--es-text-3);
           white-space: nowrap;
         }
         .es-user-greeting strong {
-          color: #94a3b8;
+          color: var(--es-text-2);
           font-weight: 600;
         }
         .es-btn-logout {
@@ -184,6 +186,27 @@ export default function Header() {
           opacity: 0.88;
           transform: translateY(-1px);
         }
+        /* Theme toggle button */
+        .es-theme-toggle {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          border-radius: 9px;
+          border: 1px solid var(--es-border);
+          background: var(--es-surface);
+          color: var(--es-text-2);
+          cursor: pointer;
+          font-size: 1rem;
+          transition: background 0.2s, border-color 0.2s, transform 0.2s;
+          flex-shrink: 0;
+        }
+        .es-theme-toggle:hover {
+          background: var(--es-surface-hover);
+          border-color: var(--es-border-hover);
+          transform: scale(1.08);
+        }
         .es-spinner {
           width: 13px;
           height: 13px;
@@ -196,7 +219,7 @@ export default function Header() {
         .es-skeleton {
           width: 80px;
           height: 32px;
-          background: rgba(255,255,255,0.05);
+          background: var(--es-surface);
           border-radius: 9px;
           animation: es-shimmer 1.5s ease-in-out infinite;
         }
@@ -208,11 +231,11 @@ export default function Header() {
         .es-menu-btn {
           display: none;
           background: none;
-          border: 1px solid rgba(255,255,255,0.1);
+          border: 1px solid var(--es-border);
           border-radius: 8px;
           padding: 6px 8px;
           cursor: pointer;
-          color: #94a3b8;
+          color: var(--es-text-2);
           font-size: 1.1rem;
           line-height: 1;
         }
@@ -222,8 +245,8 @@ export default function Header() {
           top: 64px;
           left: 0;
           right: 0;
-          background: rgba(10,10,15,0.97);
-          border-bottom: 1px solid rgba(255,255,255,0.07);
+          background: var(--es-header-bg);
+          border-bottom: 1px solid var(--es-border);
           backdrop-filter: blur(20px);
           padding: 1rem 2rem 1.5rem;
           flex-direction: column;
@@ -234,19 +257,19 @@ export default function Header() {
         .es-mobile-link {
           font-size: 0.95rem;
           font-weight: 500;
-          color: #64748b;
+          color: var(--es-text-3);
           text-decoration: none;
           padding: 10px 12px;
           border-radius: 10px;
           transition: color 0.2s, background 0.2s;
         }
         .es-mobile-link:hover, .es-mobile-link.active {
-          color: #e2e8f0;
-          background: rgba(255,255,255,0.06);
+          color: var(--es-text-1);
+          background: var(--es-surface);
         }
         .es-mobile-divider {
           height: 1px;
-          background: rgba(255,255,255,0.06);
+          background: var(--es-border);
           margin: 0.5rem 0;
         }
         /* Spacer so content isn't hidden under fixed header */
@@ -286,6 +309,16 @@ export default function Header() {
 
           {/* Right actions */}
           <div className="es-header-actions">
+            {/* Bouton toggle thème */}
+            <button
+              className="es-theme-toggle"
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+              title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+
             {loading ? (
               <div className="es-skeleton" />
             ) : user ? (
@@ -343,6 +376,16 @@ export default function Header() {
             ⚙ Administration
           </Link>
         )}
+        <div className="es-mobile-divider" />
+        {/* Theme toggle dans le menu mobile aussi */}
+        <button
+          className="es-theme-toggle"
+          onClick={toggleTheme}
+          style={{ width: '100%', borderRadius: '10px', height: '44px', fontSize: '0.95rem', gap: '8px', justifyContent: 'center' }}
+          aria-label={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+        >
+          {theme === 'dark' ? '☀️ Mode clair' : '🌙 Mode sombre'}
+        </button>
         <div className="es-mobile-divider" />
         {user ? (
           <button onClick={() => { handleLogout(); setMenuOpen(false); }} className="es-btn-logout" style={{ width: '100%', justifyContent: 'center' }}>
