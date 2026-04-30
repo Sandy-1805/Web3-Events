@@ -1,3 +1,4 @@
+// app/api/speakers/[id]/route.ts
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/index';
 import { speakers } from '@/lib/db/schema';
@@ -20,13 +21,20 @@ async function verifyAdmin() {
   }
 }
 
-// Ajoutez GET au début du fichier
+// GET - Détail d'un speaker (public) - CORRIGÉ
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }  // ← Promise
 ) {
   try {
-    const speaker = await db.select().from(speakers).where(eq(speakers.id, parseInt(params.id)));
+    const { id } = await params;  // ← await params
+    const speakerId = parseInt(id);
+    
+    if (isNaN(speakerId)) {
+      return NextResponse.json({ error: 'ID invalide' }, { status: 400 });
+    }
+    
+    const speaker = await db.select().from(speakers).where(eq(speakers.id, speakerId));
 
     if (speaker.length === 0) {
       return NextResponse.json({ error: 'Intervenant non trouvé' }, { status: 404 });
@@ -34,14 +42,15 @@ export async function GET(
 
     return NextResponse.json(speaker[0]);
   } catch (error) {
+    console.error('Erreur GET speaker:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
 
-// Ajoutez PUT avant le DELETE
+// PUT - Modifier un speaker (admin uniquement)
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }  // ← Promise
 ) {
   const isAdmin = await verifyAdmin();
   if (!isAdmin) {
@@ -49,24 +58,36 @@ export async function PUT(
   }
 
   try {
+    const { id } = await params;  // ← await params
+    const speakerId = parseInt(id);
+    
+    if (isNaN(speakerId)) {
+      return NextResponse.json({ error: 'ID invalide' }, { status: 400 });
+    }
+    
     const body = await request.json();
     const { name, bio, photo, socialLinks } = body;
 
     const [updatedSpeaker] = await db.update(speakers)
       .set({ name, bio, photo, socialLinks })
-      .where(eq(speakers.id, parseInt(params.id)))
+      .where(eq(speakers.id, speakerId))
       .returning();
+
+    if (!updatedSpeaker) {
+      return NextResponse.json({ error: 'Intervenant non trouvé' }, { status: 404 });
+    }
 
     return NextResponse.json(updatedSpeaker);
   } catch (error) {
+    console.error('Erreur PUT speaker:', error);
     return NextResponse.json({ error: 'Erreur lors de la modification' }, { status: 500 });
   }
 }
 
-
+// DELETE - Supprimer un speaker (admin uniquement)
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }  // ← Promise
 ) {
   const isAdmin = await verifyAdmin();
   if (!isAdmin) {
@@ -74,10 +95,17 @@ export async function DELETE(
   }
 
   try {
-    await db.delete(speakers).where(eq(speakers.id, parseInt(params.id)));
+    const { id } = await params;  // ← await params
+    const speakerId = parseInt(id);
+    
+    if (isNaN(speakerId)) {
+      return NextResponse.json({ error: 'ID invalide' }, { status: 400 });
+    }
+    
+    await db.delete(speakers).where(eq(speakers.id, speakerId));
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Erreur:', error);
+    console.error('Erreur DELETE speaker:', error);
     return NextResponse.json({ error: 'Erreur lors de la suppression' }, { status: 500 });
   }
 }
