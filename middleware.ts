@@ -1,3 +1,10 @@
+// middleware.ts
+// 🔐 Gestion des accès par rôle
+// RÈGLE MÉTIER (spec §6) :
+//   - Participants → accès PUBLIC, pas besoin de login
+//   - Organisateurs (admin) → login obligatoire
+//   - /favorites → login requis (favoris liés à un compte)
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
@@ -10,52 +17,62 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get('token');
   const { pathname } = request.nextUrl;
 
-  // Autoriser les routes API d'auth
+  // ✅ Toujours autoriser les routes API d'auth
   if (pathname.startsWith('/api/auth/')) {
     return NextResponse.next();
   }
 
-  // Définition des routes
-  const isLoginPage = pathname === '/login';
-  const isPublicPage = pathname === '/' || pathname === '/login';
+  // 🔒 Routes nécessitant une authentification obligatoire
+  const requiresAuth =
+    pathname.startsWith('/admin') ||
+    pathname === '/favorites';
 
-  // ❌ Pas de token + page privée → redirection login
-  if (!isPublicPage && !token) {
+  // 🌐 Routes publiques accessibles sans login
+  // (events, sessions, speakers sont publics selon la spec)
+  const isPublic =
+    pathname === '/' ||
+    pathname === '/login' ||
+    pathname.startsWith('/events') ||
+    pathname.startsWith('/sessions') ||
+    pathname.startsWith('/speakers');
+
+  // Si le token est absent et que la route nécessite auth → login
+  if (requiresAuth && !token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // ✅ Si token présent → vérifier
+  // Si un token est présent → on le vérifie dans tous les cas
   if (token) {
     try {
       const { payload } = await jwtVerify(token.value, secret);
 
-      // 🔒 Protection des routes admin
+      // 🔒 Protection des routes /admin : seul le rôle 'admin' y accède
       if (pathname.startsWith('/admin') && payload.role !== 'admin') {
         const response = NextResponse.redirect(new URL('/login', request.url));
         response.cookies.delete('token');
         return response;
       }
 
-      // 🔁 Si déjà connecté et sur login → redirection intelligente
-      if (isLoginPage) {
-        if (payload.role === 'admin') {
-          return NextResponse.redirect(new URL('/admin', request.url));
-        }
-        return NextResponse.redirect(new URL('/events', request.url));
+      // 🔁 Déjà connecté + sur page login → redirection intelligente
+      if (pathname === '/login') {
+        return NextResponse.redirect(
+          new URL(payload.role === 'admin' ? '/admin' : '/events', request.url)
+        );
       }
 
-      // ✅ Accès autorisé
       return NextResponse.next();
-
-    } catch (error) {
-      // ❌ Token invalide
-      const response = NextResponse.redirect(new URL('/login', request.url));
+    } catch {
+      // Token invalide → supprimer le cookie
+      // Si la route est publique, laisser passer quand même
+      const response = requiresAuth
+        ? NextResponse.redirect(new URL('/login', request.url))
+        : NextResponse.next();
       response.cookies.delete('token');
       return response;
     }
   }
 
-  // ✅ Cas public sans token
+  // ✅ Pas de token + route publique → accès autorisé
   return NextResponse.next();
 }
 
