@@ -1,132 +1,105 @@
-// app/events/[id]/planning/page.tsx
-import { db } from '@/lib/db';
-import { sessions, sessionSpeakers, speakers, events } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
-import { notFound } from 'next/navigation';
-import PlanningGrid from '@/components/events/PlanningGrid';
+import { db } from '@/lib/db/index';
+import { events, sessions, sessionSpeakers, speakers } from '@/lib/db/schema';
+import { eq, inArray } from 'drizzle-orm';
 import Link from 'next/link';
+import PlanningGrid from '@/components/events/PlanningGrid';
 
-interface PageProps {
-    params: Promise<{ id: string }>;
+async function getSpeakersForSessions(sessionIds: number[]) {
+  if (sessionIds.length === 0) return {};
+
+  // Utiliser inArray au lieu de SQL manuel
+  const result = await db
+    .select({
+      sessionId: sessionSpeakers.sessionId,
+      speakerId: speakers.id,
+      name: speakers.name,
+      photo: speakers.photo,
+      bio: speakers.bio,
+      socialLinks: speakers.socialLinks,
+    })
+    .from(sessionSpeakers)
+    .leftJoin(speakers, eq(sessionSpeakers.speakerId, speakers.id))
+    .where(inArray(sessionSpeakers.sessionId, sessionIds));
+
+  const speakersBySession: Record<number, any[]> = {};
+  result.forEach((row: any) => {
+    if (!speakersBySession[row.sessionId]) speakersBySession[row.sessionId] = [];
+    if (row.speakerId) {
+      speakersBySession[row.sessionId].push({
+        id: row.speakerId,
+        name: row.name,
+        photo: row.photo,
+        bio: row.bio,
+        socialLinks: row.socialLinks,
+      });
+    }
+  });
+
+  return speakersBySession;
 }
 
-export default async function PlanningPage({ params }: PageProps) {
-    const { id } = await params;
-    const eventId = parseInt(id);
+export default async function PlanningPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const eventId = parseInt(id);
 
-    if (isNaN(eventId)) notFound();
+  // Récupérer l'événement
+  const eventResult = await db.select().from(events).where(eq(events.id, eventId));
+  const event = eventResult[0];
 
-    // Fetch event
-    const [event] = await db
-        .select()
-        .from(events)
-        .where(eq(events.id, eventId))
-        .limit(1);
+  // Récupérer les sessions de l'événement
+  const allSessions = await db.select().from(sessions).where(eq(sessions.eventId, eventId));
 
-    if (!event) notFound();
+  // Récupérer les speakers pour chaque session
+  const sessionIds = allSessions.map(s => s.id);
+  const speakersBySession = await getSpeakersForSessions(sessionIds);
 
-    // Fetch sessions with speakers
-    const rawSessions = await db
-        .select({
-            id: sessions.id,
-            title: sessions.title,
-            description: sessions.description,
-            startTime: sessions.startTime,
-            endTime: sessions.endTime,
-            room: sessions.room,
-            capacity: sessions.capacity,
-            eventId: sessions.eventId,
-        })
-        .from(sessions)
-        .where(eq(sessions.eventId, eventId))
-        .orderBy(sessions.startTime);
+  // Formater les sessions avec leurs speakers et dates en objets Date
+  const sessionsWithSpeakers = allSessions.map(session => ({
+    ...session,
+    startTime: new Date(session.startTime),
+    endTime: new Date(session.endTime),
+    speakers: speakersBySession[session.id] || [],
+  }));
 
-    // Fetch speakers for each session
-    const sessionsWithSpeakers = await Promise.all(
-        rawSessions.map(async (session) => {
-            const speakerRows = await db
-                .select({ speaker: speakers })
-                .from(sessionSpeakers)
-                .innerJoin(speakers, eq(sessionSpeakers.speakerId, speakers.id))
-                .where(eq(sessionSpeakers.sessionId, session.id));
+  // Extraire les salles uniques
+  const rooms = [...new Set(sessionsWithSpeakers.map(s => s.room))];
 
-            return {
-                ...session,
-                speakers: speakerRows.map((r) => r.speaker),
-            };
-        })
-    );
-
-    // Extract unique rooms in order of first appearance
-    const rooms = Array.from(
-        new Set(sessionsWithSpeakers.map((s) => s.room))
-    );
-
+  // Vérifier si l'événement existe
+  if (!event) {
     return (
-        <div style={{ background: 'var(--es-bg-1)', minHeight: '100vh' }}>
-            {/* Page header */}
-            <div className="es-page-header">
-                <div className="es-container">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-                        <Link
-                            href={`/events/${eventId}`}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.4rem',
-                                color: 'var(--es-text-2)',
-                                textDecoration: 'none',
-                                fontSize: '0.9rem',
-                                transition: 'color 0.2s',
-                            }}
-                            onMouseOver={(e) => (e.currentTarget.style.color = 'var(--es-text-1)')}
-                            onMouseOut={(e) => (e.currentTarget.style.color = 'var(--es-text-2)')}
-                        >
-                            ← Retour à l&apos;événement
-                        </Link>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-                        <div>
-                            <span className="eventsync-section-tag">Planning</span>
-                            <h1 className="es-page-title">{event.title}</h1>
-                            <p style={{ color: 'var(--es-text-3)', fontSize: '0.9rem', marginTop: '0.4rem' }}>
-                                {new Date(event.startDate).toLocaleDateString('fr-FR', {
-                                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-                                })}
-                                {' '}·{' '}
-                                {rooms.length} salle{rooms.length > 1 ? 's' : ''}
-                                {' '}·{' '}
-                                {sessionsWithSpeakers.length} session{sessionsWithSpeakers.length > 1 ? 's' : ''}
-                            </p>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <Link href={`/favorites`}>
-                                <button className="es-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    ★ Mes favoris
-                                </button>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Planning grid */}
-            <div className="es-container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
-                {sessionsWithSpeakers.length === 0 ? (
-                    <div style={{
-                        textAlign: 'center',
-                        padding: '5rem 2rem',
-                        color: 'var(--es-text-3)',
-                    }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.3 }}>📅</div>
-                        <p style={{ fontSize: '1.1rem' }}>Aucune session programmée pour cet événement</p>
-                    </div>
-                ) : (
-                    <PlanningGrid sessions={sessionsWithSpeakers} rooms={rooms} eventId={eventId} />
-                )}
-            </div>
-        </div>
+      <div className="min-h-screen bg-[#0a0a0f] py-12 text-center">
+        <p className="text-red-400">Événement non trouvé</p>
+        <Link href="/events" className="mt-4 inline-block text-[#6366f1] hover:underline">
+          ← Retour aux événements
+        </Link>
+      </div>
     );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0f] py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 flex justify-between items-center">
+          <Link href={`/events/${eventId}`} className="text-[#6366f1] hover:underline">
+            ← Retour à l'événement
+          </Link>
+          <Link
+            href={`/events/${eventId}`}
+            className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
+          >
+            📋 Vue liste
+          </Link>
+        </div>
+
+        <h1 className="text-3xl font-bold text-white mb-2">{event.title}</h1>
+        <p className="text-gray-400 mb-6">Planning multi-track par salle</p>
+
+        <PlanningGrid
+          sessions={sessionsWithSpeakers}
+          rooms={rooms}
+          eventId={eventId}
+        />
+      </div>
+    </div>
+  );
 }

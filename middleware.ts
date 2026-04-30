@@ -8,40 +8,51 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get('token');
   const { pathname } = request.nextUrl;
 
-  // Pages publiques (accessibles sans connexion)
-  const publicPaths = ['/login'];
-  const isPublicPath = publicPaths.some(path => pathname === path);
+  // Les routes API ne sont PAS protégées (pour permettre la connexion)
+  if (pathname.startsWith('/api/auth/')) {
+    return NextResponse.next();
+  }
 
-  // Si pas de token et pas sur une page publique -> rediriger vers login
-  if (!token && !isPublicPath) {
+  // Seule la page de connexion est publique
+  const isLoginPage = pathname === '/login';
+
+  // Si on n'est pas sur login et qu'on n'a pas de token -> rediriger vers login
+  if (!isLoginPage && !token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Si token existe, vérifier le rôle
-  if (token) {
+  // Si on a un token, le vérifier
+  if (token && !isLoginPage) {
     try {
       const { payload } = await jwtVerify(token.value, secret);
-      const userRole = payload.role as string;
 
-      // Routes admin (protégées)
-      if (pathname.startsWith('/admin') && userRole !== 'admin') {
-        return NextResponse.redirect(new URL('/login', request.url));
-      }
-
-      // Si déjà connecté et va sur login -> rediriger vers home ou admin
-      if (pathname === '/login') {
-        if (userRole === 'admin') {
-          return NextResponse.redirect(new URL('/admin', request.url));
-        }
-        return NextResponse.redirect(new URL('/', request.url));
-      }
-    } catch (error) {
-      // Token invalide
-      if (!isPublicPath) {
+      // Si c'est une route admin, vérifier le rôle
+      if (pathname.startsWith('/admin') && payload.role !== 'admin') {
         const response = NextResponse.redirect(new URL('/login', request.url));
         response.cookies.delete('token');
         return response;
       }
+
+      // Tout va bien
+      return NextResponse.next();
+    } catch (error) {
+      // Token invalide -> rediriger vers login
+      const response = NextResponse.redirect(new URL('/login', request.url));
+      response.cookies.delete('token');
+      return response;
+    }
+  }
+
+  // Si on est sur login et qu'on a un token valide -> rediriger
+  if (token && isLoginPage) {
+    try {
+      const { payload } = await jwtVerify(token.value, secret);
+      if (payload.role === 'admin') {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      }
+      return NextResponse.redirect(new URL('/events', request.url));
+    } catch {
+      return NextResponse.next();
     }
   }
 

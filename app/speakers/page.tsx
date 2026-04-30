@@ -2,34 +2,62 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Speaker {
   id: number;
   name: string;
   bio: string;
   photo: string;
-  socialLinks: string;
 }
 
 export default function SpeakersPage() {
+  const router = useRouter();
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('/api/speakers')
-      .then(res => {
-        if (!res.ok) throw new Error('Erreur chargement');
-        return res.json();
-      })
-      .then(setSpeakers)
-      .catch(err => console.error('Erreur:', err))
-      .finally(() => setLoading(false));
+    fetchSpeakers();
   }, []);
+
+  const fetchSpeakers = async () => {
+    try {
+      const response = await fetch('/api/speakers');
+
+      if (response.status === 401) {
+        // Non autorisé -> rediriger vers login
+        router.push('/login');
+        return;
+      }
+
+      if (!response.ok) throw new Error('Erreur chargement');
+
+      const data = await response.json();
+      setSpeakers(data);
+    } catch (err) {
+      console.error('Erreur:', err);
+      setError('Impossible de charger les intervenants');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh] bg-[#0a0a0f]">
         <div className="text-gray-400">Chargement des intervenants...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] py-12 text-center">
+        <p className="text-red-400">{error}</p>
+        <button onClick={() => router.push('/login')} className="mt-4 text-[#6366f1] hover:underline">
+          Se connecter
+        </button>
       </div>
     );
   }
@@ -52,7 +80,6 @@ export default function SpeakersPage() {
         {speakers.length === 0 ? (
           <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
             <p className="text-gray-400">Aucun intervenant pour le moment</p>
-            <p className="text-gray-500 text-sm mt-2">Revenez plus tard pour découvrir nos intervenants</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

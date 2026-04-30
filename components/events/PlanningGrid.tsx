@@ -1,6 +1,6 @@
 'use client';
 
-// components/events/PlanningGrid.tsx
+import React from 'react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
@@ -173,6 +173,7 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
             {/* Room filter pills */}
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
                 <button
+                    key="all-rooms"
                     onClick={() => setActiveRoom(null)}
                     style={{
                         padding: '0.35rem 1rem',
@@ -271,10 +272,9 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                         {timeSlots.map((slot) => {
                             const slotDate = new Date(slot);
                             return (
-                                <>
+                                <React.Fragment key={slot}>
                                     {/* Time label */}
                                     <div
-                                        key={`time-${slot}`}
                                         style={{
                                             display: 'flex',
                                             alignItems: 'flex-start',
@@ -339,7 +339,7 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                             {live && (
-                                                                <span className="es-badge-live" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                                                <span className="es-badge-live" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', backgroundColor: 'rgba(244,63,94,0.15)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '100px', padding: '0.25rem 0.6rem', fontSize: '0.65rem', fontWeight: 700, color: '#fb7185' }}>
                                   <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f43f5e', display: 'inline-block', animation: 'pulse-live 1.5s ease-in-out infinite' }} />
                                   Live
                                 </span>
@@ -420,7 +420,7 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                                             </Link>
                                         );
                                     })}
-                                </>
+                                </React.Fragment>
                             );
                         })}
                     </div>
@@ -501,7 +501,7 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                                                     <div style={{ flex: 1, minWidth: 0 }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
                                                             {live && (
-                                                                <span className="es-badge-live" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                                                <span className="es-badge-live" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', backgroundColor: 'rgba(244,63,94,0.15)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '100px', padding: '0.25rem 0.6rem', fontSize: '0.65rem', fontWeight: 700, color: '#fb7185' }}>
                                   <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f43f5e', display: 'inline-block', animation: 'pulse-live 1.5s ease-in-out infinite' }} />
                                   Live
                                 </span>
