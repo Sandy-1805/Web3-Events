@@ -67,16 +67,18 @@ export default function EventDetailPage() {
       const data = await response.json();
       setEvent(data);
     } catch (err) {
-      setError('Impossible de charger l\'événement');
+      setError("Impossible de charger l'événement");
       console.error(err);
     }
   };
 
+  // ✅ CORRECTION : utilise la route dédiée /api/events/[id]/sessions
+  // au lieu de /api/session (qui chargeait toutes les sessions et filtrait côté client)
   const fetchSessions = async () => {
     try {
-      const response = await fetch('/api/session');
-      const allSessions: Session[] = await response.json();
-      const eventSessions = allSessions.filter((s) => s.eventId === parseInt(eventId));
+      const response = await fetch(`/api/events/${eventId}/sessions`);
+      if (!response.ok) throw new Error('Erreur chargement sessions');
+      const eventSessions: Session[] = await response.json();
       setSessions(eventSessions);
 
       if (eventSessions.length > 0) {
@@ -129,6 +131,7 @@ export default function EventDetailPage() {
       const response = await fetch('/api/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           title: newSession.title,
           description: newSession.description || null,
@@ -490,6 +493,7 @@ function SessionCard({
       await fetch('/api/favorites', {
         method,
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ sessionId: session.id }),
       });
       setIsFavorite(!isFavorite);
@@ -504,7 +508,10 @@ function SessionCard({
 
     setDeleting(true);
     try {
-      const response = await fetch(`/api/session/${session.id}`, { method: 'DELETE' });
+      const response = await fetch(`/api/session/${session.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
       if (response.ok) {
         onSessionDeleted();
       } else {

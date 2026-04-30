@@ -39,9 +39,11 @@ export default function CreateEventPage() {
     }
 
     try {
+      // ✅ CORRECTION : ajout de credentials: 'include' pour envoyer le cookie JWT
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,
@@ -183,7 +185,7 @@ export default function CreateEventPage() {
                 disabled={isSubmitting}
                 className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition"
               >
-                {isSubmitting ? 'Création...' : 'Créer l\'événement'}
+                {isSubmitting ? 'Création...' : "Créer l'événement"}
               </button>
             </div>
           </form>
