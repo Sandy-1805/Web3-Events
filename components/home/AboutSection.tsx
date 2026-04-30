@@ -24,7 +24,7 @@ export default function AboutSection() {
     <>
       <style>{`
         .es-about {
-          background: #0a0a0f;
+          background: var(--es-bg-1);
           padding: 6rem 2rem;
           position: relative;
           overflow: hidden;
@@ -55,30 +55,30 @@ export default function AboutSection() {
           font-weight: 700;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #6366f1;
+          color: var(--es-accent);
           margin-bottom: 1rem;
         }
         .es-about-title {
           font-size: clamp(1.8rem, 3vw, 2.6rem);
           font-weight: 800;
-          color: #f1f5f9;
+          color: var(--es-text-1);
           line-height: 1.15;
           letter-spacing: -0.02em;
           margin: 0 0 1.5rem;
         }
         .es-about-desc {
           font-size: 0.95rem;
-          color: #64748b;
+          color: var(--es-text-2);
           line-height: 1.75;
           margin: 0 0 2rem;
         }
         .es-about-quote {
           background: rgba(99,102,241,0.08);
-          border-left: 3px solid #6366f1;
+          border-left: 3px solid var(--es-accent);
           border-radius: 0 12px 12px 0;
           padding: 1rem 1.25rem;
           font-size: 0.9rem;
-          color: #a5b4fc;
+          color: var(--es-accent);
           font-style: italic;
           line-height: 1.6;
         }
@@ -108,19 +108,19 @@ export default function AboutSection() {
         .es-step-title {
           font-size: 1rem;
           font-weight: 700;
-          color: #e2e8f0;
+          color: var(--es-text-1);
           margin: 0 0 0.35rem;
         }
         .es-step-desc {
           font-size: 0.85rem;
-          color: #64748b;
+          color: var(--es-text-3);
           line-height: 1.6;
           margin: 0;
         }
         .es-step-connector {
           width: 1px;
           height: 20px;
-          background: rgba(255,255,255,0.08);
+          background: var(--es-border);
           margin: 4px 0 4px 17px;
         }
         @media (max-width: 768px) {

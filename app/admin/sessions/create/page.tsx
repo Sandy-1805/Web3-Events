@@ -139,7 +139,7 @@ export default function CreateSessionPage() {
                 required
                 value={formData.eventId}
                 onChange={(e) => setFormData({ ...formData, eventId: e.target.value })}
-                className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
+                className="w-full bg-gray-800 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
               >
                 <option value="">Sélectionner un événement</option>
                 {events.map(event => (
