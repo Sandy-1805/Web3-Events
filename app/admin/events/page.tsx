@@ -1,5 +1,14 @@
 'use client';
 
+// app/admin/events/page.tsx
+// CORRECTIONS THÈME :
+// - bg-[#0a0a0f] → style={{ background: 'var(--es-bg-1)' }} (géré par admin/layout.tsx)
+// - bg-white/5 border-white/10 → classe .es-table-container (déjà dans globals.css)
+// - text-white → style color: var(--es-text-1)
+// - text-gray-400/500 → var(--es-text-2) / var(--es-text-3)
+// - bg-white/10 (thead) → var(--es-table-header-bg)
+// - bg-[#0d0d14] (modale) → var(--es-modal-bg)
+
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -36,9 +45,7 @@ export default function AdminEventsPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user?.role === 'admin') {
-      fetchEvents();
-    }
+    if (user?.role === 'admin') fetchEvents();
   }, [user]);
 
   useEffect(() => {
@@ -91,34 +98,27 @@ export default function AdminEventsPage() {
   const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedEvents = filteredEvents.slice(startIndex, startIndex + itemsPerPage);
+  const goToPage = (page: number) => setCurrentPage(Math.max(1, Math.min(page, totalPages)));
 
-  const goToPage = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  };
-
+  // Loading state - utilise les variables CSS pour le thème
   if (loading || isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-[#0a0a0f]">
-        <div className="text-gray-400">Chargement...</div>
+      <div className="flex justify-center items-center" style={{ minHeight: '60vh' }}>
+        <div style={{ color: 'var(--es-text-3)' }}>Chargement...</div>
       </div>
     );
   }
 
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
+  if (!user || user.role !== 'admin') return null;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] py-8">
+    <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* En-tête */}
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-            Gestion des événements
-          </h1>
-          <Link
-            href="/admin/events/create"
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
-          >
+          <h1 className="es-page-title">Gestion des événements</h1>
+          <Link href="/admin/events/create" className="es-btn-primary">
             + Nouvel événement
           </Link>
         </div>
@@ -131,60 +131,71 @@ export default function AdminEventsPage() {
               placeholder="🔍 Rechercher un événement..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
+              className="es-input"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                style={{ color: 'var(--es-text-3)' }}
               >
                 ✕
               </button>
             )}
           </div>
-          <p className="text-gray-500 text-sm mt-2">{filteredEvents.length} événement(s)</p>
+          <p className="text-sm mt-2" style={{ color: 'var(--es-text-3)' }}>
+            {filteredEvents.length} événement(s)
+          </p>
         </div>
 
+        {/* Liste vide */}
         {filteredEvents.length === 0 ? (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
-            <p className="text-gray-400">Aucun événement trouvé</p>
+          <div className="es-card p-12 text-center">
+            <p style={{ color: 'var(--es-text-2)' }}>Aucun événement trouvé</p>
             {searchTerm && (
-              <button onClick={() => setSearchTerm('')} className="mt-4 text-[#6366f1] hover:underline">
+              <button
+                onClick={() => setSearchTerm('')}
+                className="mt-4"
+                style={{ color: 'var(--es-accent)' }}
+              >
                 Effacer la recherche
               </button>
             )}
           </div>
         ) : (
           <>
-            <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-white/10">
+            {/* Tableau */}
+            <div className="es-table-container">
+              <table className="es-table">
+                <thead>
                   <tr>
-                    <th className="text-left p-4 text-gray-400 font-medium">Titre</th>
-                    <th className="text-left p-4 text-gray-400 font-medium">Dates</th>
-                    <th className="text-left p-4 text-gray-400 font-medium">Lieu</th>
-                    <th className="text-left p-4 text-gray-400 font-medium">Actions</th>
+                    <th>Titre</th>
+                    <th>Dates</th>
+                    <th>Lieu</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/10">
+                <tbody>
                   {paginatedEvents.map((event) => (
-                    <tr key={event.id} className="hover:bg-white/5 transition">
-                      <td className="p-4 text-white">{event.title}</td>
-                      <td className="p-4 text-gray-400 text-sm">
+                    <tr key={event.id}>
+                      <td>{event.title}</td>
+                      <td style={{ color: 'var(--es-text-2)', fontSize: '0.875rem' }}>
                         {new Date(event.startDate).toLocaleDateString('fr-FR')}
                       </td>
-                      <td className="p-4 text-gray-400 text-sm">{event.location || '—'}</td>
-                      <td className="p-4">
+                      <td style={{ color: 'var(--es-text-2)', fontSize: '0.875rem' }}>
+                        {event.location || '—'}
+                      </td>
+                      <td>
                         <div className="flex space-x-3">
                           <Link
                             href={`/admin/events/${event.id}/edit`}
-                            className="text-[#a5b4fc] hover:text-white transition"
+                            style={{ color: 'var(--es-accent)', fontSize: '0.875rem' }}
                           >
                             Modifier
                           </Link>
                           <button
                             onClick={() => openDeleteModal(event.id, event.title)}
-                            className="text-red-400 hover:text-red-300 transition"
+                            style={{ color: 'var(--es-live)', fontSize: '0.875rem' }}
                           >
                             Supprimer
                           </button>
@@ -202,15 +213,19 @@ export default function AdminEventsPage() {
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20 transition"
+                  className="es-btn-secondary"
+                  style={{ opacity: currentPage === 1 ? 0.5 : 1 }}
                 >
                   ← Précédent
                 </button>
-                <span className="text-gray-400">Page {currentPage} / {totalPages}</span>
+                <span style={{ color: 'var(--es-text-2)' }}>
+                  Page {currentPage} / {totalPages}
+                </span>
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20 transition"
+                  className="es-btn-secondary"
+                  style={{ opacity: currentPage === totalPages ? 0.5 : 1 }}
                 >
                   Suivant →
                 </button>
@@ -220,32 +235,31 @@ export default function AdminEventsPage() {
         )}
       </div>
 
-      {/* Modale */}
+      {/* Modale de suppression - utilise les variables CSS */}
       {modalConfig.isOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#0d0d14] border border-white/10 rounded-xl p-6 max-w-md w-full mx-4">
+        <div className="es-modal-overlay">
+          <div className="es-modal">
             <div className="text-center mb-4">
-              <div className="w-12 h-12 mx-auto bg-red-500/20 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div
+                className="w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-4"
+                style={{ background: 'rgba(244, 63, 94, 0.15)' }}
+              >
+                <svg className="w-6 h-6" style={{ color: 'var(--es-live)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Confirmer la suppression</h3>
-              <p className="text-gray-400">
-                Êtes-vous sûr de vouloir supprimer "{modalConfig.eventTitle}" ?
+              <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--es-text-1)' }}>
+                Confirmer la suppression
+              </h3>
+              <p style={{ color: 'var(--es-text-2)' }}>
+                Êtes-vous sûr de vouloir supprimer &ldquo;{modalConfig.eventTitle}&rdquo; ?
               </p>
             </div>
             <div className="flex justify-center gap-3">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
-              >
+              <button onClick={closeModal} className="es-btn-secondary px-4 py-2">
                 Annuler
               </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 hover:bg-red-500/30 transition"
-              >
+              <button onClick={confirmDelete} className="es-btn-danger es-btn-secondary px-4 py-2">
                 Supprimer
               </button>
             </div>

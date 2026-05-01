@@ -1,5 +1,13 @@
 'use client';
 
+// app/admin/speakers/page.tsx
+// CORRECTIONS THÈME :
+// - bg-[#0a0a0f] → géré par admin/layout.tsx
+// - bg-white/5 bg-white/10 border-white/10 → .es-card
+// - text-white → var(--es-text-1)
+// - text-gray-400/500 → var(--es-text-2) / var(--es-text-3)
+// - bg-white/10 border-white/20 input → .es-input
+
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -30,9 +38,7 @@ export default function AdminSpeakersPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user?.role === 'admin') {
-      fetchSpeakers();
-    }
+    if (user?.role === 'admin') fetchSpeakers();
   }, [user]);
 
   useEffect(() => {
@@ -46,8 +52,8 @@ export default function AdminSpeakersPage() {
 
   const fetchSpeakers = async () => {
     try {
-      const response = await fetch('/api/speakers');
-      const data = await response.json();
+      const res = await fetch('/api/speakers');
+      const data = await res.json();
       setAllSpeakers(data);
       setFilteredSpeakers(data);
     } catch (error) {
@@ -59,12 +65,9 @@ export default function AdminSpeakersPage() {
 
   const deleteSpeaker = async (id: number) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet intervenant ?')) return;
-
     try {
-      const response = await fetch(`/api/speakers/${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        setAllSpeakers(allSpeakers.filter(s => s.id !== id));
-      }
+      const res = await fetch(`/api/speakers/${id}`, { method: 'DELETE' });
+      if (res.ok) setAllSpeakers(allSpeakers.filter(s => s.id !== id));
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -77,27 +80,22 @@ export default function AdminSpeakersPage() {
 
   if (loading || isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-[#0a0a0f]">
-        <div className="text-gray-400">Chargement...</div>
+      <div className="flex justify-center items-center" style={{ minHeight: '60vh' }}>
+        <div style={{ color: 'var(--es-text-3)' }}>Chargement...</div>
       </div>
     );
   }
 
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
+  if (!user || user.role !== 'admin') return null;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] py-8">
+    <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* En-tête */}
         <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-            Gestion des intervenants
-          </h1>
-          <Link
-            href="/admin/speakers/create"
-            className="bg-gradient-to-r from-green-600 to-teal-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
-          >
+          <h1 className="es-page-title">Gestion des intervenants</h1>
+          <Link href="/admin/speakers/create" className="es-btn-primary">
             + Nouvel intervenant
           </Link>
         </div>
@@ -110,56 +108,67 @@ export default function AdminSpeakersPage() {
               placeholder="🔍 Rechercher un intervenant..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
+              className="es-input"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                style={{ color: 'var(--es-text-3)' }}
               >
                 ✕
               </button>
             )}
           </div>
-          <p className="text-gray-500 text-sm mt-2">{filteredSpeakers.length} intervenant(s)</p>
+          <p className="text-sm mt-2" style={{ color: 'var(--es-text-3)' }}>
+            {filteredSpeakers.length} intervenant(s)
+          </p>
         </div>
 
+        {/* Liste vide */}
         {filteredSpeakers.length === 0 ? (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
-            <p className="text-gray-400">Aucun intervenant trouvé</p>
+          <div className="es-card p-12 text-center">
+            <p style={{ color: 'var(--es-text-2)' }}>Aucun intervenant trouvé</p>
             {searchTerm && (
-              <button onClick={() => setSearchTerm('')} className="mt-4 text-[#6366f1] hover:underline">
+              <button
+                onClick={() => setSearchTerm('')}
+                className="mt-4"
+                style={{ color: 'var(--es-accent)' }}
+              >
                 Effacer la recherche
               </button>
             )}
           </div>
         ) : (
           <>
+            {/* Grille de cartes */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedSpeakers.map((speaker) => (
-                <div key={speaker.id} className="bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:bg-white/10 transition">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xl font-semibold text-white">{speaker.name}</h3>
-                      <div className="flex space-x-2">
-                        <Link
-                          href={`/admin/speakers/${speaker.id}/edit`}
-                          className="text-[#a5b4fc] hover:text-white transition"
-                        >
-                          Modifier
-                        </Link>
-                        <button
-                          onClick={() => deleteSpeaker(speaker.id)}
-                          className="text-red-400 hover:text-red-300 transition"
-                        >
-                          Supprimer
-                        </button>
-                      </div>
+                <div key={speaker.id} className="es-card p-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-semibold" style={{ color: 'var(--es-text-1)' }}>
+                      {speaker.name}
+                    </h3>
+                    <div className="flex space-x-2">
+                      <Link
+                        href={`/admin/speakers/${speaker.id}/edit`}
+                        style={{ color: 'var(--es-accent)', fontSize: '0.875rem' }}
+                      >
+                        Modifier
+                      </Link>
+                      <button
+                        onClick={() => deleteSpeaker(speaker.id)}
+                        style={{ color: 'var(--es-live)', fontSize: '0.875rem' }}
+                      >
+                        Supprimer
+                      </button>
                     </div>
-                    {speaker.bio && (
-                      <p className="mt-2 text-gray-400 text-sm line-clamp-3">{speaker.bio}</p>
-                    )}
                   </div>
+                  {speaker.bio && (
+                    <p className="mt-2 text-sm line-clamp-3" style={{ color: 'var(--es-text-2)' }}>
+                      {speaker.bio}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -170,15 +179,19 @@ export default function AdminSpeakersPage() {
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20 transition"
+                  className="es-btn-secondary"
+                  style={{ opacity: currentPage === 1 ? 0.5 : 1 }}
                 >
                   ← Précédent
                 </button>
-                <span className="text-gray-400">Page {currentPage} / {totalPages}</span>
+                <span style={{ color: 'var(--es-text-2)' }}>
+                  Page {currentPage} / {totalPages}
+                </span>
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20 transition"
+                  className="es-btn-secondary"
+                  style={{ opacity: currentPage === totalPages ? 0.5 : 1 }}
                 >
                   Suivant →
                 </button>

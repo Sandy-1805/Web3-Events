@@ -1,5 +1,14 @@
 'use client';
 
+// app/admin/events/create/page.tsx
+// CORRECTIONS THÈME :
+// - bg-[#0a0a0f] → géré par admin/layout.tsx (var(--es-bg-1))
+// - bg-white/5 border-white/10 → .es-card
+// - text-white → var(--es-text-1) via .es-input et styles inline
+// - bg-white/10 border-white/20 → .es-input
+// - text-gray-400 labels → .es-label
+// - bg-red-500/10 erreur → .es-alert-error
+
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -39,7 +48,6 @@ export default function CreateEventPage() {
     }
 
     try {
-      // ✅ CORRECTION : ajout de credentials: 'include' pour envoyer le cookie JWT
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -68,65 +76,63 @@ export default function CreateEventPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-[#0a0a0f]">
-        <div className="text-gray-400">Chargement...</div>
+      <div className="flex justify-center items-center" style={{ minHeight: '60vh' }}>
+        <div style={{ color: 'var(--es-text-3)' }}>Chargement...</div>
       </div>
     );
   }
 
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
+  if (!user || user.role !== 'admin') return null;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] py-8">
+    <div className="py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Lien retour */}
         <div className="mb-6">
-          <Link href="/admin/events" className="text-[#6366f1] hover:underline">
+          <Link href="/admin/events" style={{ color: 'var(--es-accent)' }}>
             ← Retour à la liste
           </Link>
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-          <h1 className="text-2xl font-bold text-white mb-6">Créer un événement</h1>
+        {/* Carte formulaire */}
+        <div className="es-card p-6">
+          <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--es-text-1)' }}>
+            Créer un événement
+          </h1>
 
           {error && (
-            <div className="mb-4 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg">
+            <div className="es-alert-error mb-4">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                Titre *
-              </label>
+              <label className="es-label">Titre *</label>
               <input
                 type="text"
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
+                className="es-input"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                Description
-              </label>
+              <label className="es-label">Description</label>
               <textarea
                 rows={4}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
+                className="es-input"
+                style={{ resize: 'vertical' }}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Date et heure de début *
-                </label>
+                <label className="es-label">Date et heure de début *</label>
                 <DatePicker
                   selected={formData.startDate}
                   onChange={(date) => setFormData({ ...formData, startDate: date || new Date() })}
@@ -136,15 +142,13 @@ export default function CreateEventPage() {
                   timeIntervals={15}
                   timeCaption="Heure"
                   locale={fr}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
+                  className="es-input"
                   wrapperClassName="w-full"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Date et heure de fin *
-                </label>
+                <label className="es-label">Date et heure de fin *</label>
                 <DatePicker
                   selected={formData.endDate}
                   onChange={(date) => setFormData({ ...formData, endDate: date || new Date() })}
@@ -154,7 +158,7 @@ export default function CreateEventPage() {
                   timeIntervals={15}
                   timeCaption="Heure"
                   locale={fr}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
+                  className="es-input"
                   wrapperClassName="w-full"
                   minDate={formData.startDate}
                 />
@@ -162,28 +166,24 @@ export default function CreateEventPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                Lieu
-              </label>
+              <label className="es-label">Lieu</label>
               <input
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
+                className="es-input"
               />
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Link
-                href="/admin/events"
-                className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
-              >
+              <Link href="/admin/events" className="es-btn-secondary px-4 py-2">
                 Annuler
               </Link>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition"
+                className="es-btn-primary"
+                style={{ opacity: isSubmitting ? 0.55 : 1 }}
               >
                 {isSubmitting ? 'Création...' : "Créer l'événement"}
               </button>

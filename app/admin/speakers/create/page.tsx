@@ -1,5 +1,17 @@
 'use client';
 
+// app/admin/speakers/create/page.tsx
+// CORRECTIONS THÈME :
+// Cette page avait un GROS bloc de styles inline CSS avec background: #0a0a0f hardcodé.
+// On remplace TOUT par :
+//   - .es-card pour la carte principale
+//   - .es-input pour les champs
+//   - .es-label pour les labels
+//   - .es-btn-primary pour le bouton submit
+//   - .es-alert-error pour les erreurs
+//   - var(--es-*) pour tout le reste
+// Le fond de page (#0a0a0f) est géré par admin/layout.tsx
+
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -51,338 +63,110 @@ export default function CreateSpeakerPage() {
 
   if (loading) {
     return (
-      <div className="es-login-page">
-        <div className="es-login-grid" />
-        <div className="es-login-glow-1" />
-        <div className="es-login-glow-2" />
-        <div className="es-login-glow-3" />
-        <div className="es-login-inner es-create-speaker-inner">
-          <div className="es-login-card" style={{ textAlign: 'center' }}>
-            <div className="es-spinner" style={{ margin: '0 auto', width: '24px', height: '24px' }} />
-            <p style={{ marginTop: '1rem', color: '#64748b' }}>Chargement...</p>
-          </div>
-        </div>
+      <div className="flex justify-center items-center" style={{ minHeight: '60vh' }}>
+        <div style={{ color: 'var(--es-text-3)' }}>Chargement...</div>
       </div>
     );
   }
 
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
+  if (!user || user.role !== 'admin') return null;
 
   return (
-    <>
-      <style>{`
-        .es-login-page {
-          min-height: 100vh;
-          background: #0a0a0f;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          overflow: hidden;
-          padding: 2rem 1rem;
-        }
+    <div className="py-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        /* Grille de fond */
-        .es-login-grid {
-          position: absolute;
-          inset: 0;
-          background-image:
-            linear-gradient(rgba(99,102,241,0.07) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(99,102,241,0.07) 1px, transparent 1px);
-          background-size: 60px 60px;
-          pointer-events: none;
-        }
+        {/* Lien retour */}
+        <div className="mb-6">
+          <Link href="/admin/speakers" style={{ color: 'var(--es-accent)', fontSize: '0.875rem' }}>
+            ← Retour à la liste
+          </Link>
+        </div>
 
-        /* Glows ambiants */
-        .es-login-glow-1 {
-          position: absolute;
-          width: 700px;
-          height: 700px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(99,102,241,0.14) 0%, transparent 65%);
-          top: -200px;
-          right: -150px;
-          pointer-events: none;
-        }
-        .es-login-glow-2 {
-          position: absolute;
-          width: 500px;
-          height: 500px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 65%);
-          bottom: -150px;
-          left: -100px;
-          pointer-events: none;
-        }
-        .es-login-glow-3 {
-          position: absolute;
-          width: 300px;
-          height: 300px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(34,211,238,0.06) 0%, transparent 65%);
-          top: 40%;
-          left: 20%;
-          pointer-events: none;
-        }
+        {/* Carte formulaire */}
+        <div className="es-card p-6">
 
-        /* Conteneur principal — plus large pour le formulaire d'intervenant */
-        .es-login-inner {
-          position: relative;
-          z-index: 1;
-          width: 100%;
-          max-width: 320px; /* fallback */
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        .es-create-speaker-inner {
-          max-width: 800px;
-        }
+          {/* En-tête */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold" style={{ color: 'var(--es-text-1)', letterSpacing: '-0.02em' }}>
+              Ajouter un intervenant
+            </h2>
+            <p className="text-sm mt-1" style={{ color: 'var(--es-text-3)' }}>
+              Remplissez les informations du conférencier ou de l&apos;intervenant
+            </p>
+          </div>
 
-        /* Carte */
-        .es-login-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 24px;
-          padding: 2rem;
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          width: 100%;
-        }
+          {/* Erreur */}
+          {error && (
+            <div className="es-alert-error mb-6">
+              <span>⚠️</span> {error}
+            </div>
+          )}
 
-        /* En-tête */
-        .es-login-card-header {
-          margin-bottom: 1.75rem;
-        }
-        .es-login-card-title {
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: #f1f5f9;
-          margin: 0 0 0.35rem;
-          letter-spacing: -0.02em;
-        }
-        .es-login-card-sub {
-          font-size: 0.85rem;
-          color: #475569;
-          margin: 0;
-        }
+          <form onSubmit={handleSubmit} className="space-y-5">
 
-        /* Champs */
-        .es-form-group {
-          margin-bottom: 1.25rem;
-        }
-        .es-form-label {
-          display: block;
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: #64748b;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
-          margin-bottom: 0.45rem;
-        }
-        .es-form-input {
-          width: 100%;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 10px;
-          padding: 10px 14px;
-          font-size: 0.92rem;
-          color: #f1f5f9;
-          outline: none;
-          transition: border-color 0.2s, background 0.2s;
-          box-sizing: border-box;
-          font-family: inherit;
-        }
-        .es-form-input::placeholder { color: #334155; }
-        .es-form-input:focus {
-          border-color: rgba(99,102,241,0.5);
-          background: rgba(99,102,241,0.05);
-        }
-        textarea.es-form-input {
-          resize: vertical;
-          min-height: 100px;
-        }
-
-        /* Bouton principal */
-        .es-login-submit {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
-          color: #fff;
-          font-size: 0.92rem;
-          font-weight: 700;
-          padding: 12px 24px;
-          border-radius: 11px;
-          border: none;
-          cursor: pointer;
-          transition: opacity 0.2s, transform 0.2s;
-          margin-top: 0.5rem;
-          letter-spacing: 0.01em;
-        }
-        .es-login-submit:hover:not(:disabled) {
-          opacity: 0.88;
-          transform: translateY(-1px);
-        }
-        .es-login-submit:disabled {
-          opacity: 0.55;
-          cursor: not-allowed;
-        }
-
-        /* Spinner */
-        .es-spinner {
-          width: 14px;
-          height: 14px;
-          border: 2px solid rgba(255,255,255,0.25);
-          border-top-color: #fff;
-          border-radius: 50%;
-          animation: es-spin 0.7s linear infinite;
-          flex-shrink: 0;
-        }
-        @keyframes es-spin { to { transform: rotate(360deg); } }
-
-        /* Message d'erreur */
-        .es-login-error {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: rgba(244,63,94,0.1);
-          border: 1px solid rgba(244,63,94,0.2);
-          border-radius: 10px;
-          padding: 10px 14px;
-          margin-bottom: 1.5rem;
-          font-size: 0.85rem;
-          color: #fb7185;
-        }
-
-        /* Lien retour */
-        .es-back-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          background: none;
-          border: none;
-          font-size: 0.85rem;
-          color: #6366f1;
-          cursor: pointer;
-          padding: 0;
-          transition: color 0.2s;
-          text-decoration: none;
-          margin-bottom: 1.5rem;
-        }
-        .es-back-link:hover {
-          color: #a5b4fc;
-        }
-
-        /* Séparateur optionnel (non utilisé ici mais gardé pour cohérence) */
-        .es-login-divider {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin: 1.25rem 0;
-        }
-        .es-login-divider-line {
-          flex: 1;
-          height: 1px;
-          background: rgba(255,255,255,0.07);
-        }
-      `}</style>
-
-      <div className="es-login-page">
-        <div className="es-login-grid" />
-        <div className="es-login-glow-1" />
-        <div className="es-login-glow-2" />
-        <div className="es-login-glow-3" />
-
-        <div className="es-login-inner es-create-speaker-inner">
-          <div className="es-login-card">
-            {/* Lien retour */}
-            <Link href="/admin/speakers" className="es-back-link">
-              ← Retour à la liste
-            </Link>
-
-            <div className="es-login-card-header">
-              <h2 className="es-login-card-title">Ajouter un intervenant</h2>
-              <p className="es-login-card-sub">
-                Remplissez les informations du conférencier ou de l’intervenant
-              </p>
+            <div>
+              <label className="es-label">Nom complet *</label>
+              <input
+                type="text"
+                required
+                placeholder="Ex: Sarah Dupont"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="es-input"
+              />
             </div>
 
-            {error && (
-              <div className="es-login-error">
-                <span>⚠️</span>
-                {error}
-              </div>
-            )}
+            <div>
+              <label className="es-label">Biographie</label>
+              <textarea
+                rows={4}
+                value={formData.bio}
+                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                className="es-input"
+                style={{ resize: 'vertical' }}
+                placeholder="Présentation de l'intervenant, son parcours, ses domaines d'expertise..."
+              />
+            </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="es-form-group">
-                <label className="es-form-label">Nom complet *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Sarah Dupont"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="es-form-input"
-                />
-              </div>
+            <div>
+              <label className="es-label">URL de la photo</label>
+              <input
+                type="url"
+                value={formData.photo}
+                onChange={(e) => setFormData({ ...formData, photo: e.target.value })}
+                className="es-input"
+                placeholder="https://exemple.com/photo.jpg"
+              />
+            </div>
 
-              <div className="es-form-group">
-                <label className="es-form-label">Biographie</label>
-                <textarea
-                  rows={4}
-                  value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  className="es-form-input"
-                  placeholder="Présentation de l'intervenant, son parcours, ses domaines d'expertise..."
-                />
-              </div>
+            <div>
+              <label className="es-label">Liens sociaux (JSON)</label>
+              <input
+                type="text"
+                value={formData.socialLinks}
+                onChange={(e) => setFormData({ ...formData, socialLinks: e.target.value })}
+                className="es-input"
+                placeholder='{"twitter": "https://twitter.com/...", "linkedin": "https://linkedin.com/..."}'
+              />
+            </div>
 
-              <div className="es-form-group">
-                <label className="es-form-label">URL de la photo</label>
-                <input
-                  type="url"
-                  value={formData.photo}
-                  onChange={(e) => setFormData({ ...formData, photo: e.target.value })}
-                  className="es-form-input"
-                  placeholder="https://exemple.com/photo.jpg"
-                />
-              </div>
-
-              <div className="es-form-group">
-                <label className="es-form-label">Liens sociaux (JSON)</label>
-                <input
-                  type="text"
-                  value={formData.socialLinks}
-                  onChange={(e) => setFormData({ ...formData, socialLinks: e.target.value })}
-                  className="es-form-input"
-                  placeholder='{"twitter": "https://twitter.com/...", "linkedin": "https://linkedin.com/..."}'
-                />
-              </div>
-
+            <div className="flex justify-end space-x-3 pt-2">
+              <Link href="/admin/speakers" className="es-btn-secondary px-4 py-2">
+                Annuler
+              </Link>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="es-login-submit"
+                className="es-btn-primary"
+                style={{ opacity: isSubmitting ? 0.55 : 1 }}
               >
-                {isSubmitting ? (
-                  <>
-                    <span className="es-spinner" />
-                    Ajout en cours...
-                  </>
-                ) : (
-                  'Ajouter l’intervenant →'
-                )}
+                {isSubmitting ? 'Ajout en cours...' : "Ajouter l'intervenant →"}
               </button>
-            </form>
-          </div>
+            </div>
+
+          </form>
         </div>
       </div>
-    </>
+    </div>
   );
 }

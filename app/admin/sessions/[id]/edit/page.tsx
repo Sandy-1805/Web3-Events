@@ -1,5 +1,14 @@
-// app/admin/sessions/[id]/edit/page.tsx
 'use client';
+
+// app/admin/sessions/[id]/edit/page.tsx
+// CORRECTIONS THÈME :
+// - min-h-screen bg-[#0a0a0f] → géré par admin/layout.tsx
+// - bg-white/5 border-white/10 → .es-card
+// - text-white / text-gray-400 → var(--es-text-1) / .es-label
+// - bg-white/10 border-white/20 inputs + selects → .es-input
+// - bg-red-500/10 → .es-alert-error
+// - border-white/10 (séparateur) → var(--es-border)
+// - bg-white/5 (speaker chips) → var(--es-surface)
 
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
@@ -40,15 +49,11 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    params.then((resolvedParams) => {
-      setSessionId(resolvedParams.id);
-    });
+    params.then((resolvedParams) => setSessionId(resolvedParams.id));
   }, [params]);
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) {
-      router.push('/login');
-    }
+    if (!loading && (!user || user.role !== 'admin')) router.push('/login');
   }, [user, loading, router]);
 
   useEffect(() => {
@@ -62,9 +67,8 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch('/api/events');
-      const data = await response.json();
-      setEvents(data);
+      const res = await fetch('/api/events');
+      setEvents(await res.json());
     } catch (error) {
       console.error('Erreur chargement événements:', error);
     }
@@ -72,9 +76,8 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
   const fetchAllSpeakers = async () => {
     try {
-      const response = await fetch('/api/speakers');
-      const data = await response.json();
-      setAllSpeakers(data);
+      const res = await fetch('/api/speakers');
+      setAllSpeakers(await res.json());
     } catch (error) {
       console.error('Erreur chargement speakers:', error);
     }
@@ -83,9 +86,8 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   const fetchAssignedSpeakers = async () => {
     if (!sessionId) return;
     try {
-      const response = await fetch(`/api/session-speakers?sessionId=${sessionId}`);
-      const data = await response.json();
-      setAssignedSpeakers(data);
+      const res = await fetch(`/api/session-speakers?sessionId=${sessionId}`);
+      setAssignedSpeakers(await res.json());
     } catch (error) {
       console.error('Erreur chargement speakers assignés:', error);
     }
@@ -94,9 +96,9 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
   const fetchSession = async () => {
     if (!sessionId) return;
     try {
-      const response = await fetch(`/api/session/${sessionId}`);
-      if (!response.ok) throw new Error('Erreur chargement session');
-      const data = await response.json();
+      const res = await fetch(`/api/session/${sessionId}`);
+      if (!res.ok) throw new Error('Erreur chargement session');
+      const data = await res.json();
       setFormData({
         title: data.title,
         description: data.description || '',
@@ -124,7 +126,6 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
       setIsSubmitting(false);
       return;
     }
-
     if (!sessionId) {
       setError('ID de session invalide');
       setIsSubmitting(false);
@@ -135,13 +136,13 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
     const endDate = new Date(formData.endTime);
 
     if (startDate >= endDate) {
-      setError('L\'heure de fin doit être postérieure à l\'heure de début');
+      setError("L'heure de fin doit être postérieure à l'heure de début");
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const response = await fetch(`/api/session/${sessionId}`, {
+      const res = await fetch(`/api/session/${sessionId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -155,8 +156,8 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
         }),
       });
 
-      if (!response.ok) {
-        const data = await response.json();
+      if (!res.ok) {
+        const data = await res.json();
         throw new Error(data.error || 'Erreur lors de la modification');
       }
 
@@ -171,9 +172,8 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
   const assignSpeaker = async () => {
     if (!selectedSpeakerId || !sessionId) return;
-
     try {
-      const response = await fetch('/api/session-speakers', {
+      const res = await fetch('/api/session-speakers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -181,13 +181,12 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
           speakerId: parseInt(selectedSpeakerId),
         }),
       });
-
-      if (response.ok) {
+      if (res.ok) {
         setSelectedSpeakerId('');
         fetchAssignedSpeakers();
       } else {
-        const data = await response.json();
-        alert(data.error || 'Erreur lors de l\'assignation');
+        const data = await res.json();
+        alert(data.error || "Erreur lors de l'assignation");
       }
     } catch (error) {
       console.error('Erreur:', error);
@@ -196,13 +195,11 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
   const removeSpeaker = async (speakerId: number) => {
     if (!sessionId) return;
-
     try {
-      const response = await fetch(`/api/session-speakers?sessionId=${sessionId}&speakerId=${speakerId}`, {
+      const res = await fetch(`/api/session-speakers?sessionId=${sessionId}&speakerId=${speakerId}`, {
         method: 'DELETE',
       });
-
-      if (response.ok) {
+      if (res.ok) {
         fetchAssignedSpeakers();
       } else {
         alert('Erreur lors de la suppression');
@@ -214,149 +211,138 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
   if (loading || isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-[#0a0a0f]">
-        <div className="text-gray-400">Chargement...</div>
+      <div className="flex justify-center items-center" style={{ minHeight: '60vh' }}>
+        <div style={{ color: 'var(--es-text-3)' }}>Chargement...</div>
       </div>
     );
   }
 
-  if (!user || user.role !== 'admin') {
-    return null;
-  }
+  if (!user || user.role !== 'admin') return null;
 
   const availableSpeakers = allSpeakers.filter(
-    (speaker) => !assignedSpeakers.some((assigned) => assigned.id === speaker.id)
+    (s) => !assignedSpeakers.some((a) => a.id === s.id)
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] py-8">
+    <div className="py-8">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
         <div className="mb-6">
-          <Link href="/admin/sessions" className="text-[#6366f1] hover:underline">
+          <Link href="/admin/sessions" style={{ color: 'var(--es-accent)' }}>
             ← Retour à la liste
           </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Formulaire de modification */}
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-            <h1 className="text-2xl font-bold text-white mb-6">Modifier la session</h1>
 
-            {error && (
-              <div className="mb-4 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
+          {/* ── Formulaire de modification ── */}
+          <div className="es-card p-6">
+            <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--es-text-1)' }}>
+              Modifier la session
+            </h1>
+
+            {error && <div className="es-alert-error mb-4">{error}</div>}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Événement *
-                </label>
+                <label className="es-label">Événement *</label>
                 <select
                   required
                   value={formData.eventId}
                   onChange={(e) => setFormData({ ...formData, eventId: e.target.value })}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
+                  className="es-input"
                 >
-                  <option value="">Sélectionner un événement</option>
+                  <option value="" style={{ background: 'var(--es-bg-1)', color: 'var(--es-text-1)' }}>
+                    Sélectionner un événement
+                  </option>
                   {events.map(event => (
-                    <option key={event.id} value={event.id}>{event.title}</option>
+                    <option
+                      key={event.id}
+                      value={event.id}
+                      style={{ background: 'var(--es-bg-1)', color: 'var(--es-text-1)' }}
+                    >
+                      {event.title}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Titre *
-                </label>
+                <label className="es-label">Titre *</label>
                 <input
                   type="text"
                   required
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
+                  className="es-input"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Description
-                </label>
+                <label className="es-label">Description</label>
                 <textarea
                   rows={4}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
+                  className="es-input"
+                  style={{ resize: 'vertical' }}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
-                    Date et heure de début *
-                  </label>
+                  <label className="es-label">Date et heure de début *</label>
                   <input
                     type="datetime-local"
                     required
                     value={formData.startTime}
                     onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
+                    className="es-input"
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
-                    Date et heure de fin *
-                  </label>
+                  <label className="es-label">Date et heure de fin *</label>
                   <input
                     type="datetime-local"
                     required
                     value={formData.endTime}
                     onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
+                    className="es-input"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
-                    Salle *
-                  </label>
+                  <label className="es-label">Salle *</label>
                   <input
                     type="text"
                     required
                     value={formData.room}
                     onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
+                    className="es-input"
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
-                    Capacité (optionnel)
-                  </label>
+                  <label className="es-label">Capacité (optionnel)</label>
                   <input
                     type="number"
                     value={formData.capacity}
                     onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
+                    className="es-input"
                   />
                 </div>
               </div>
 
               <div className="flex justify-end space-x-3">
-                <Link
-                  href="/admin/sessions"
-                  className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition"
-                >
+                <Link href="/admin/sessions" className="es-btn-secondary px-4 py-2">
                   Annuler
                 </Link>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition"
+                  className="es-btn-primary"
+                  style={{ opacity: isSubmitting ? 0.55 : 1 }}
                 >
                   {isSubmitting ? 'Sauvegarde...' : 'Sauvegarder'}
                 </button>
@@ -364,23 +350,32 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             </form>
           </div>
 
-          {/* Section Assignation des speakers */}
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-            <h2 className="text-xl font-bold text-white mb-4">🎤 Intervenants de la session</h2>
+          {/* ── Assignation des speakers ── */}
+          <div className="es-card p-6">
+            <h2 className="text-xl font-bold mb-4" style={{ color: 'var(--es-text-1)' }}>
+              🎤 Intervenants de la session
+            </h2>
 
-            {/* Liste des speakers déjà assignés */}
+            {/* Speakers assignés */}
             {assignedSpeakers.length === 0 ? (
-              <p className="text-gray-400 text-sm mb-4">Aucun intervenant assigné pour le moment.</p>
+              <p className="text-sm mb-4" style={{ color: 'var(--es-text-2)' }}>
+                Aucun intervenant assigné pour le moment.
+              </p>
             ) : (
               <div className="space-y-2 mb-6">
                 {assignedSpeakers.map((speaker) => (
-                  <div key={speaker.id} className="flex justify-between items-center bg-white/5 rounded-lg p-3">
-                    <div>
-                      <span className="text-white font-medium">{speaker.name}</span>
-                    </div>
+                  <div
+                    key={speaker.id}
+                    className="flex justify-between items-center rounded-lg p-3"
+                    style={{ background: 'var(--es-surface)', border: '1px solid var(--es-border)' }}
+                  >
+                    <span className="font-medium" style={{ color: 'var(--es-text-1)' }}>
+                      {speaker.name}
+                    </span>
                     <button
                       onClick={() => removeSpeaker(speaker.id)}
-                      className="text-red-400 hover:text-red-300 text-sm transition"
+                      className="text-sm"
+                      style={{ color: 'var(--es-live)' }}
                     >
                       Retirer
                     </button>
@@ -391,25 +386,36 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
 
             {/* Ajouter un speaker */}
             {availableSpeakers.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-white/10">
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Ajouter un intervenant
-                </label>
-                <div className="flex gap-2">
+              <div
+                className="mt-4 pt-4"
+                style={{ borderTop: '1px solid var(--es-border)' }}
+              >
+                <label className="es-label">Ajouter un intervenant</label>
+                <div className="flex gap-2 mt-2">
                   <select
                     value={selectedSpeakerId}
                     onChange={(e) => setSelectedSpeakerId(e.target.value)}
-                    className="flex-1 bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white focus:outline-none focus:border-[#6366f1]"
+                    className="es-input"
+                    style={{ flex: 1 }}
                   >
-                    <option value="">Sélectionner un intervenant</option>
+                    <option value="" style={{ background: 'var(--es-bg-1)', color: 'var(--es-text-1)' }}>
+                      Sélectionner un intervenant
+                    </option>
                     {availableSpeakers.map((speaker) => (
-                      <option key={speaker.id} value={speaker.id}>{speaker.name}</option>
+                      <option
+                        key={speaker.id}
+                        value={speaker.id}
+                        style={{ background: 'var(--es-bg-1)', color: 'var(--es-text-1)' }}
+                      >
+                        {speaker.name}
+                      </option>
                     ))}
                   </select>
                   <button
                     onClick={assignSpeaker}
                     disabled={!selectedSpeakerId}
-                    className="px-4 py-2 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition"
+                    className="es-btn-primary"
+                    style={{ opacity: !selectedSpeakerId ? 0.5 : 1, whiteSpace: 'nowrap' }}
                   >
                     Ajouter
                   </button>
@@ -418,18 +424,25 @@ export default function EditSessionPage({ params }: { params: Promise<{ id: stri
             )}
 
             {availableSpeakers.length === 0 && assignedSpeakers.length > 0 && (
-              <p className="text-gray-500 text-sm mt-4">Tous les intervenants sont déjà assignés à cette session.</p>
+              <p className="text-sm mt-4" style={{ color: 'var(--es-text-3)' }}>
+                Tous les intervenants sont déjà assignés à cette session.
+              </p>
             )}
 
-            <div className="mt-4 pt-4 border-t border-white/10">
+            <div
+              className="mt-4 pt-4"
+              style={{ borderTop: '1px solid var(--es-border)' }}
+            >
               <Link
                 href="/admin/speakers/create"
-                className="text-[#6366f1] text-sm hover:underline"
+                className="text-sm"
+                style={{ color: 'var(--es-accent)' }}
               >
                 + Créer un nouvel intervenant
               </Link>
             </div>
           </div>
+
         </div>
       </div>
     </div>

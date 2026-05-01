@@ -1,5 +1,14 @@
 'use client';
 
+// app/admin/questions/page.tsx
+// CORRECTIONS THÈME :
+// - min-h-screen bg-[#0a0a0f] → géré par admin/layout.tsx
+// - bg-white/5 border-white/10 → .es-table-container + .es-table
+// - text-white → var(--es-text-1) via .es-table td
+// - text-gray-400 → var(--es-text-2)
+// - bg-white/10 (thead) → var(--es-table-header-bg)
+// - from-white to-gray-400 (titre) → .es-page-title
+
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -27,15 +36,13 @@ export default function AdminQuestionsPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user?.role === 'admin') {
-      fetchQuestions();
-    }
+    if (user?.role === 'admin') fetchQuestions();
   }, [user]);
 
   const fetchQuestions = async () => {
     try {
-      const response = await fetch('/api/questions');
-      const data = await response.json();
+      const res = await fetch('/api/questions');
+      const data = await res.json();
       setQuestions(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Erreur:', error);
@@ -47,10 +54,8 @@ export default function AdminQuestionsPage() {
   const deleteQuestion = async (id: number) => {
     if (!confirm('Supprimer cette question ?')) return;
     try {
-      const response = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        setQuestions(questions.filter(q => q.id !== id));
-      }
+      const res = await fetch(`/api/questions/${id}`, { method: 'DELETE' });
+      if (res.ok) setQuestions(questions.filter(q => q.id !== id));
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -58,8 +63,8 @@ export default function AdminQuestionsPage() {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-        <div className="text-gray-400">Chargement...</div>
+      <div className="flex justify-center items-center" style={{ minHeight: '60vh' }}>
+        <div style={{ color: 'var(--es-text-3)' }}>Chargement...</div>
       </div>
     );
   }
@@ -67,45 +72,45 @@ export default function AdminQuestionsPage() {
   if (!user || user.role !== 'admin') return null;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] py-8">
+    <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Lien retour */}
         <div className="mb-6">
-          <Link href="/admin" className="text-[#6366f1] hover:underline">
+          <Link href="/admin" style={{ color: 'var(--es-accent)', fontSize: '0.875rem' }}>
             ← Retour au tableau de bord
           </Link>
         </div>
 
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-6">
-          💬 Gestion des questions
-        </h1>
+        <h1 className="es-page-title mb-6">💬 Gestion des questions</h1>
 
         {questions.length === 0 ? (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
-            <p className="text-gray-400">Aucune question posée pour le moment</p>
+          <div className="es-card p-12 text-center">
+            <p style={{ color: 'var(--es-text-2)' }}>Aucune question posée pour le moment</p>
           </div>
         ) : (
-          <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-white/10">
+          <div className="es-table-container">
+            <table className="es-table">
+              <thead>
                 <tr>
-                  <th className="text-left p-4 text-gray-400 font-medium">Question</th>
-                  <th className="text-left p-4 text-gray-400 font-medium">Auteur</th>
-                  <th className="text-left p-4 text-gray-400 font-medium">Votes</th>
-                  <th className="text-left p-4 text-gray-400 font-medium">Session</th>
-                  <th className="text-left p-4 text-gray-400 font-medium">Actions</th>
+                  <th>Question</th>
+                  <th>Auteur</th>
+                  <th>Votes</th>
+                  <th>Session</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10">
+              <tbody>
                 {questions.map((q) => (
-                  <tr key={q.id} className="hover:bg-white/5 transition">
-                    <td className="p-4 text-white">{q.content}</td>
-                    <td className="p-4 text-gray-400">{q.authorName || 'Anonyme'}</td>
-                    <td className="p-4 text-gray-400">👍 {q.upvotes}</td>
-                    <td className="p-4 text-gray-400">Session #{q.sessionId}</td>
-                    <td className="p-4">
+                  <tr key={q.id}>
+                    <td>{q.content}</td>
+                    <td style={{ color: 'var(--es-text-2)' }}>{q.authorName || 'Anonyme'}</td>
+                    <td style={{ color: 'var(--es-text-2)' }}>👍 {q.upvotes}</td>
+                    <td style={{ color: 'var(--es-text-2)' }}>Session #{q.sessionId}</td>
+                    <td>
                       <button
                         onClick={() => deleteQuestion(q.id)}
-                        className="text-red-400 hover:text-red-300 transition"
+                        style={{ color: 'var(--es-live)', fontSize: '0.875rem' }}
                       >
                         Supprimer
                       </button>
