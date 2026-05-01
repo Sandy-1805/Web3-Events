@@ -1,8 +1,3 @@
-// app/api/speakers/[id]/sessions/route.ts
-// 🎤 Récupérer les sessions d'un intervenant donné
-// Cette route est PUBLIQUE (pas besoin d'être connecté)
-// Elle est appelée depuis la page publique /speakers/[id]
-
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/index';
 import { sessions, sessionSpeakers } from '@/lib/db/schema';

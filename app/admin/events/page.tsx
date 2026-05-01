@@ -1,14 +1,5 @@
 'use client';
 
-// app/admin/events/page.tsx
-// CORRECTIONS THÈME :
-// - bg-[#0a0a0f] → style={{ background: 'var(--es-bg-1)' }} (géré par admin/layout.tsx)
-// - bg-white/5 border-white/10 → classe .es-table-container (déjà dans globals.css)
-// - text-white → style color: var(--es-text-1)
-// - text-gray-400/500 → var(--es-text-2) / var(--es-text-3)
-// - bg-white/10 (thead) → var(--es-table-header-bg)
-// - bg-[#0d0d14] (modale) → var(--es-modal-bg)
-
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

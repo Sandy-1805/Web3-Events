@@ -1,6 +1,3 @@
-// ✅ Footer entièrement thématisé avec les variables CSS du design system
-// Plus aucune couleur hardcodée (#07070e, #f1f5f9, #475569, etc.)
-
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 

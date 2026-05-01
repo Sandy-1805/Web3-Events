@@ -1,4 +1,3 @@
-// components/ui/ConfirmModal.tsx
 'use client';
 
 interface ConfirmModalProps {

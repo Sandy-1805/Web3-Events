@@ -1,14 +1,5 @@
 'use client';
 
-// app/admin/events/create/page.tsx
-// CORRECTIONS THÈME :
-// - bg-[#0a0a0f] → géré par admin/layout.tsx (var(--es-bg-1))
-// - bg-white/5 border-white/10 → .es-card
-// - text-white → var(--es-text-1) via .es-input et styles inline
-// - bg-white/10 border-white/20 → .es-input
-// - text-gray-400 labels → .es-label
-// - bg-red-500/10 erreur → .es-alert-error
-
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

@@ -1,12 +1,3 @@
-// components/ui/FavoriteButton.tsx
-// ⭐ Bouton favori réutilisable
-// Utilise localStorage (spec §4.8 : stockage côté navigateur)
-// Peut s'utiliser dans le PlanningGrid, la page session, etc.
-//
-// 💡 Pourquoi un composant séparé ?
-//   Pour éviter de dupliquer la logique localStorage dans chaque page.
-//   C'est le principe DRY : Don't Repeat Yourself.
-
 'use client';
 
 import { useEffect, useState } from 'react';

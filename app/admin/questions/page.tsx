@@ -1,14 +1,5 @@
 'use client';
 
-// app/admin/questions/page.tsx
-// CORRECTIONS THÈME :
-// - min-h-screen bg-[#0a0a0f] → géré par admin/layout.tsx
-// - bg-white/5 border-white/10 → .es-table-container + .es-table
-// - text-white → var(--es-text-1) via .es-table td
-// - text-gray-400 → var(--es-text-2)
-// - bg-white/10 (thead) → var(--es-table-header-bg)
-// - from-white to-gray-400 (titre) → .es-page-title
-
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

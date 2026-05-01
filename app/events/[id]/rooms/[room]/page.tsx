@@ -1,9 +1,3 @@
-// app/events/[id]/rooms/[room]/page.tsx
-// 🚪 Vue Planning par Salle (spec §4.7)
-// Affiche les sessions d'une salle spécifique dans un événement
-// ACCÈS : public
-// URL exemple : /events/1/rooms/Salle%20A
-
 'use client';
 
 import { useEffect, useState } from 'react';
