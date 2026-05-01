@@ -1,7 +1,3 @@
-// app/speakers/page.tsx
-// 🎤 Liste publique des intervenants
-// ACCÈS : public, aucune authentification requise (spec §2.3)
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -19,9 +15,7 @@ export default function SpeakersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchSpeakers();
-  }, []);
+  useEffect(() => { fetchSpeakers(); }, []);
 
   const fetchSpeakers = async () => {
     try {
@@ -37,76 +31,67 @@ export default function SpeakersPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh] bg-[#0a0a0f]">
-        <div className="text-gray-400">Chargement des intervenants...</div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'60vh', background:'var(--es-bg-1)' }}>
+      <div style={{ color:'var(--es-text-2)' }}>Chargement des intervenants...</div>
+    </div>
+  );
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0f] py-12 text-center">
-        <p className="text-red-400">{error}</p>
-        <button onClick={fetchSpeakers} className="mt-4 text-[#6366f1] hover:underline">
-          Réessayer
-        </button>
-      </div>
-    );
-  }
+  if (error) return (
+    <div style={{ minHeight:'100vh', background:'var(--es-bg-1)', padding:'3rem', textAlign:'center' }}>
+      <p style={{ color:'var(--es-live)' }}>{error}</p>
+      <button onClick={fetchSpeakers} style={{ marginTop:'1rem', color:'var(--es-accent)', background:'none', border:'none', cursor:'pointer' }}>Réessayer</button>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <span className="inline-block text-sm font-bold tracking-wider text-[#6366f1] uppercase mb-3">
-            Conférenciers
-          </span>
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-4">
-            Nos intervenants
-          </h1>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            Des experts passionnés qui partagent leurs connaissances et leur expérience.
-          </p>
-        </div>
+    <>
+      <style>{`
+        .sp-page { min-height:100vh; background:var(--es-bg-1); padding:3rem 0; transition:background 0.25s ease; }
+        .sp-container { max-width:1280px; margin:0 auto; padding:0 1.5rem; }
+        .sp-header { text-align:center; margin-bottom:3rem; }
+        .sp-tag { display:inline-block; font-size:0.75rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--es-accent); margin-bottom:0.75rem; }
+        .sp-title { font-size:clamp(2rem,5vw,3rem); font-weight:800; background:linear-gradient(135deg,var(--es-text-1) 0%,var(--es-text-2) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:1rem; }
+        .sp-subtitle { color:var(--es-text-2); max-width:40rem; margin:0 auto; }
+        .sp-empty { text-align:center; padding:4rem 0; background:var(--es-surface); border:1px solid var(--es-border); border-radius:1rem; }
+        .sp-empty p { color:var(--es-text-2); }
+        .sp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1.5rem; }
+        .sp-card { background:var(--es-surface); border:1px solid var(--es-border); border-radius:0.75rem; padding:1.5rem; transition:background 0.2s,border-color 0.2s,transform 0.2s; text-decoration:none; display:block; cursor:pointer; }
+        .sp-card:hover { background:var(--es-surface-hover); border-color:var(--es-border-hover); transform:translateY(-4px); }
+        .sp-avatar { width:5rem; height:5rem; margin:0 auto 1rem; border-radius:50%; background:linear-gradient(135deg,var(--es-accent),var(--es-accent-2)); display:flex; align-items:center; justify-content:center; font-size:2rem; overflow:hidden; }
+        .sp-name { font-size:1.15rem; font-weight:600; color:var(--es-text-1); margin-bottom:0.5rem; text-align:center; transition:color 0.2s; }
+        .sp-card:hover .sp-name { color:var(--es-accent); }
+        .sp-bio { color:var(--es-text-2); font-size:0.875rem; text-align:center; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+      `}</style>
 
-        {speakers.length === 0 ? (
-          <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
-            <p className="text-gray-400">Aucun intervenant pour le moment</p>
+      <div className="sp-page">
+        <div className="sp-container">
+          <div className="sp-header">
+            <span className="sp-tag">Conférenciers</span>
+            <h1 className="sp-title">Nos intervenants</h1>
+            <p className="sp-subtitle">Des experts passionnés qui partagent leurs connaissances et leur expérience.</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {speakers.map((speaker) => (
-              <Link href={`/speakers/${speaker.id}`} key={speaker.id}>
-                <div className="group bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-                  {/* Photo ou avatar par défaut */}
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-[#6366f1] to-[#ec4899] flex items-center justify-center text-3xl overflow-hidden">
+
+          {speakers.length === 0 ? (
+            <div className="sp-empty"><p>Aucun intervenant pour le moment</p></div>
+          ) : (
+            <div className="sp-grid">
+              {speakers.map((speaker) => (
+                <Link href={`/speakers/${speaker.id}`} key={speaker.id} className="sp-card">
+                  <div className="sp-avatar">
                     {speaker.photo ? (
-                      <img
-                        src={speaker.photo}
-                        alt={speaker.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      '🎤'
-                    )}
+                      <img src={speaker.photo} alt={speaker.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    ) : '🎤'}
                   </div>
-                  <h2 className="text-xl font-semibold text-white mb-2 text-center group-hover:text-[#a5b4fc] transition">
-                    {speaker.name}
-                  </h2>
-                  <p className="text-gray-400 text-sm line-clamp-3 text-center">
-                    {speaker.bio || 'Bio à venir'}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+                  <h2 className="sp-name">{speaker.name}</h2>
+                  <p className="sp-bio">{speaker.bio || 'Bio à venir'}</p>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

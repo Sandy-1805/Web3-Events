@@ -1,4 +1,3 @@
-// app/sessions/[id]/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -7,23 +6,14 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 
 interface Session {
-  id: number;
-  title: string;
-  description: string;
-  startTime: string;
-  endTime: string;
-  room: string;
-  capacity: number | null;
-  eventId: number;
+  id: number; title: string; description: string;
+  startTime: string; endTime: string; room: string;
+  capacity: number | null; eventId: number;
 }
 
 interface Question {
-  id: number;
-  content: string;
-  authorName: string;
-  upvotes: number;
-  createdAt: string;
-  sessionId: number;
+  id: number; content: string; authorName: string;
+  upvotes: number; createdAt: string; sessionId: number;
 }
 
 export default function SessionDetailPage() {
@@ -41,10 +31,7 @@ export default function SessionDetailPage() {
   const [voting, setVoting] = useState<number | null>(null);
 
   useEffect(() => {
-    if (sessionId) {
-      fetchSession();
-      fetchQuestions();
-    }
+    if (sessionId) { fetchSession(); fetchQuestions(); }
   }, [sessionId]);
 
   const fetchSession = async () => {
@@ -55,7 +42,6 @@ export default function SessionDetailPage() {
       setSession(data);
     } catch (err) {
       setError('Impossible de charger la session');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -66,205 +52,179 @@ export default function SessionDetailPage() {
       const response = await fetch(`/api/sessions/${sessionId}/questions`);
       const data = await response.json();
       setQuestions(data.sort((a: Question, b: Question) => b.upvotes - a.upvotes));
-    } catch (err) {
-      console.error('Erreur chargement questions:', err);
-    }
+    } catch (err) { console.error('Erreur chargement questions:', err); }
   };
 
   const handleSubmitQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newQuestion.trim()) return;
-
     setSubmitting(true);
     try {
       const response = await fetch(`/api/sessions/${sessionId}/questions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: newQuestion,
-          authorName: authorName.trim() || 'Anonyme',
-        }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: newQuestion, authorName: authorName.trim() || 'Anonyme' }),
       });
-
-      if (response.ok) {
-        setNewQuestion('');
-        fetchQuestions();
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Erreur lors de l\'envoi');
-      }
-    } catch (error) {
-      console.error('Erreur:', error);
-      alert('Erreur de connexion');
-    } finally {
-      setSubmitting(false);
-    }
+      if (response.ok) { setNewQuestion(''); fetchQuestions(); }
+      else { const data = await response.json(); alert(data.error || "Erreur lors de l'envoi"); }
+    } catch { alert('Erreur de connexion'); }
+    finally { setSubmitting(false); }
   };
 
   const handleUpvote = async (questionId: number) => {
     setVoting(questionId);
     try {
-      const response = await fetch(`/api/questions/${questionId}/upvote`, {
-        method: 'POST',
-      });
-      if (response.ok) {
-        fetchQuestions();
-      }
-    } catch (error) {
-      console.error('Erreur vote:', error);
-    } finally {
-      setVoting(null);
-    }
+      const response = await fetch(`/api/questions/${questionId}/upvote`, { method: 'POST' });
+      if (response.ok) fetchQuestions();
+    } catch (error) { console.error('Erreur vote:', error); }
+    finally { setVoting(null); }
   };
 
   const isLive = () => {
     if (!session) return false;
     const now = new Date();
-    const start = new Date(session.startTime);
-    const end = new Date(session.endTime);
-    return now >= start && now <= end;
+    return now >= new Date(session.startTime) && now <= new Date(session.endTime);
   };
 
   const getTimeAgo = (date: string) => {
     const diffSeconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
     const absDiff = Math.abs(diffSeconds);
-
     if (absDiff < 60) return diffSeconds < 0 ? "dans quelques secondes" : "à l'instant";
-    if (absDiff < 3600) {
-      const mins = Math.floor(absDiff / 60);
-      return diffSeconds < 0 ? `dans ${mins} min` : `il y a ${mins} min`;
-    }
-    if (absDiff < 86400) {
-      const hours = Math.floor(absDiff / 3600);
-      return diffSeconds < 0 ? `dans ${hours}h` : `il y a ${hours}h`;
-    }
-    const days = Math.floor(absDiff / 86400);
-    return diffSeconds < 0 ? `dans ${days}j` : `il y a ${days}j`;
+    if (absDiff < 3600) { const m = Math.floor(absDiff/60); return diffSeconds < 0 ? `dans ${m} min` : `il y a ${m} min`; }
+    if (absDiff < 86400) { const h = Math.floor(absDiff/3600); return diffSeconds < 0 ? `dans ${h}h` : `il y a ${h}h`; }
+    const d = Math.floor(absDiff/86400); return diffSeconds < 0 ? `dans ${d}j` : `il y a ${d}j`;
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0f] py-12">
-        <div className="text-center text-gray-400">Chargement de la session...</div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div style={{ minHeight:'100vh', background:'var(--es-bg-1)', padding:'3rem', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <div style={{ color:'var(--es-text-2)' }}>Chargement de la session...</div>
+    </div>
+  );
 
-  if (error || !session) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0f] py-12">
-        <div className="text-center">
-          <p className="text-red-400">{error || 'Session non trouvée'}</p>
-          <Link href="/events" className="mt-4 inline-block text-[#6366f1] hover:underline">
-            ← Retour aux événements
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  if (error || !session) return (
+    <div style={{ minHeight:'100vh', background:'var(--es-bg-1)', padding:'3rem', textAlign:'center' }}>
+      <p style={{ color:'var(--es-live)' }}>{error || 'Session non trouvée'}</p>
+      <Link href="/events" style={{ marginTop:'1rem', display:'inline-block', color:'var(--es-accent)' }}>← Retour aux événements</Link>
+    </div>
+  );
 
   const live = isLive();
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <Link href={`/events/${session.eventId}`} className="text-[#6366f1] hover:underline">
-            ← Retour à l'événement
-          </Link>
-        </div>
+    <>
+      <style>{`
+        .sd-page { min-height:100vh; background:var(--es-bg-1); padding:2rem 0; transition:background 0.25s ease; }
+        .sd-container { max-width:1280px; margin:0 auto; padding:0 1.5rem; }
+        .sd-back { color:var(--es-accent); text-decoration:none; display:inline-block; margin-bottom:1.5rem; }
+        .sd-back:hover { opacity:0.8; }
+        /* Carte info session */
+        .sd-info-card { background:var(--es-surface); border:1px solid var(--es-border); border-radius:0.75rem; padding:1.5rem; margin-bottom:2rem; }
+        .sd-info-top { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:1rem; }
+        .sd-title { font-size:1.8rem; font-weight:800; color:var(--es-text-1); margin:0; }
+        .sd-live-badge { background:rgba(244,63,94,0.15); color:#fb7185; font-size:0.75rem; font-weight:700; padding:0.25rem 0.75rem; border-radius:100px; animation:sd-pulse 1.5s ease-in-out infinite; }
+        @keyframes sd-pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        .sd-meta { display:flex; flex-wrap:wrap; gap:1rem; color:var(--es-text-2); }
+        .sd-desc { color:var(--es-text-2); margin-top:1rem; line-height:1.6; }
+        /* Zone Q&R */
+        .sd-qa-grid { display:grid; grid-template-columns:1fr 2fr; gap:2rem; }
+        @media(max-width:768px) { .sd-qa-grid { grid-template-columns:1fr; } }
+        .sd-qa-card { background:var(--es-surface); border:1px solid var(--es-border); border-radius:0.75rem; padding:1.5rem; }
+        .sd-qa-title { font-size:1.15rem; font-weight:700; color:var(--es-text-1); margin-bottom:1rem; }
+        .sd-form-input, .sd-form-textarea {
+          width:100%; background:var(--es-input-bg); border:1px solid var(--es-border);
+          border-radius:0.5rem; padding:0.5rem 0.75rem; color:var(--es-text-1);
+          outline:none; transition:border-color 0.2s; box-sizing:border-box; margin-bottom:0.75rem;
+        }
+        .sd-form-input::placeholder, .sd-form-textarea::placeholder { color:var(--es-text-3); }
+        .sd-form-input:focus, .sd-form-textarea:focus { border-color:var(--es-accent); }
+        .sd-form-textarea { resize:vertical; }
+        .sd-submit-btn { width:100%; background:linear-gradient(135deg,var(--es-accent),#8b5cf6); color:#fff; padding:0.6rem 1rem; border-radius:0.5rem; border:none; cursor:pointer; font-weight:600; transition:opacity 0.2s; }
+        .sd-submit-btn:hover:not(:disabled) { opacity:0.85; }
+        .sd-submit-btn:disabled { opacity:0.5; cursor:not-allowed; }
+        /* Questions */
+        .sd-q-list { display:flex; flex-direction:column; gap:1rem; }
+        .sd-q-item { background:var(--es-surface); border:1px solid var(--es-border); border-radius:0.75rem; padding:1.25rem; }
+        .sd-q-inner { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
+        .sd-q-meta { display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.5rem; }
+        .sd-q-author { font-size:0.875rem; font-weight:600; color:var(--es-accent); }
+        .sd-q-time { font-size:0.75rem; color:var(--es-text-3); }
+        .sd-q-top-badge { font-size:0.7rem; background:rgba(245,158,11,0.15); color:#fbbf24; padding:0.1rem 0.5rem; border-radius:100px; }
+        .sd-q-content { color:var(--es-text-1); }
+        .sd-upvote-btn { display:flex; flex-direction:column; align-items:center; padding:0.5rem 0.75rem; background:var(--es-surface-hover); border:1px solid var(--es-border); border-radius:0.5rem; cursor:pointer; min-width:3.5rem; transition:background 0.2s; }
+        .sd-upvote-btn:hover:not(:disabled) { border-color:var(--es-accent); }
+        .sd-upvote-count { font-size:0.875rem; font-weight:700; color:var(--es-text-1); margin-top:0.15rem; }
+        .sd-not-live { background:var(--es-surface); border:1px solid var(--es-border); border-radius:0.75rem; padding:3rem; text-align:center; }
+        .sd-not-live p { color:var(--es-text-2); }
+      `}</style>
 
-        {/* Infos session */}
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-8">
-          <div className="flex justify-between items-start mb-4 flex-wrap gap-4">
-            <h1 className="text-3xl font-bold text-white">{session.title}</h1>
-            {live && (
-              <span className="bg-red-500/20 text-red-400 text-xs font-semibold px-3 py-1 rounded-full animate-pulse">
-                🔴 LIVE
-              </span>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-4 text-gray-400">
-            <span>📅 {new Date(session.startTime).toLocaleString('fr-FR')}</span>
-            <span>🚪 {session.room}</span>
-            {session.capacity && <span>👥 {session.capacity} places</span>}
-          </div>
-          {session.description && <p className="text-gray-300 mt-4">{session.description}</p>}
-        </div>
+      <div className="sd-page">
+        <div className="sd-container">
+          <Link href={`/events/${session.eventId}`} className="sd-back">← Retour à l'événement</Link>
 
-        {/* Q&R - seulement en LIVE */}
-        {live ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-1">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h2 className="text-xl font-bold text-white mb-4">💬 Poser une question</h2>
-                <form onSubmit={handleSubmitQuestion} className="space-y-4">
-                  <input
-                    type="text"
-                    value={authorName}
-                    onChange={(e) => setAuthorName(e.target.value)}
-                    placeholder="Votre nom (optionnel)"
-                    className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
-                  />
-                  <textarea
-                    rows={4}
-                    required
-                    value={newQuestion}
-                    onChange={(e) => setNewQuestion(e.target.value)}
-                    placeholder="Votre question..."
-                    className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
-                  />
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white py-2 rounded-lg"
-                  >
-                    {submitting ? 'Envoi...' : '📤 Envoyer'}
-                  </button>
-                </form>
+          <div className="sd-info-card">
+            <div className="sd-info-top">
+              <h1 className="sd-title">{session.title}</h1>
+              {live && <span className="sd-live-badge">🔴 LIVE</span>}
+            </div>
+            <div className="sd-meta">
+              <span>📅 {new Date(session.startTime).toLocaleString('fr-FR')}</span>
+              <span>🚪 {session.room}</span>
+              {session.capacity && <span>👥 {session.capacity} places</span>}
+            </div>
+            {session.description && <p className="sd-desc">{session.description}</p>}
+          </div>
+
+          {live ? (
+            <div className="sd-qa-grid">
+              <div>
+                <div className="sd-qa-card">
+                  <h2 className="sd-qa-title">💬 Poser une question</h2>
+                  <form onSubmit={handleSubmitQuestion}>
+                    <input type="text" value={authorName} onChange={(e) => setAuthorName(e.target.value)}
+                      placeholder="Votre nom (optionnel)" className="sd-form-input" />
+                    <textarea rows={4} required value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)}
+                      placeholder="Votre question..." className="sd-form-input sd-form-textarea" />
+                    <button type="submit" disabled={submitting} className="sd-submit-btn">
+                      {submitting ? 'Envoi...' : '📤 Envoyer'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="sd-qa-title" style={{ color:'var(--es-text-1)' }}>📢 Questions ({questions.length})</h2>
+                {questions.length === 0 ? (
+                  <div className="sd-not-live"><p>Aucune question pour l'instant</p></div>
+                ) : (
+                  <div className="sd-q-list">
+                    {questions.map((q, idx) => (
+                      <div key={q.id} className="sd-q-item">
+                        <div className="sd-q-inner">
+                          <div style={{ flex:1 }}>
+                            <div className="sd-q-meta">
+                              <span className="sd-q-author">{q.authorName}</span>
+                              <span className="sd-q-time">• {getTimeAgo(q.createdAt)}</span>
+                              {idx === 0 && <span className="sd-q-top-badge">🔥 Top</span>}
+                            </div>
+                            <p className="sd-q-content">{q.content}</p>
+                          </div>
+                          <button onClick={() => handleUpvote(q.id)} disabled={voting === q.id} className="sd-upvote-btn">
+                            <span>👍</span>
+                            <span className="sd-upvote-count">{q.upvotes}</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-
-            <div className="lg:col-span-2">
-              <h2 className="text-xl font-bold text-white mb-4">📢 Questions ({questions.length})</h2>
-              {questions.length === 0 ? (
-                <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center text-gray-400">
-                  Aucune question pour l'instant
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {questions.map((q, idx) => (
-                    <div key={q.id} className="bg-white/5 border border-white/10 rounded-xl p-5">
-                      <div className="flex justify-between items-start gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <span className="text-sm font-medium text-[#a5b4fc]">{q.authorName}</span>
-                            <span className="text-xs text-gray-500">• {getTimeAgo(q.createdAt)}</span>
-                            {idx === 0 && <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">🔥 Top</span>}
-                          </div>
-                          <p className="text-white">{q.content}</p>
-                        </div>
-                        <button
-                          onClick={() => handleUpvote(q.id)}
-                          disabled={voting === q.id}
-                          className="flex flex-col items-center px-3 py-2 bg-white/10 rounded-lg min-w-[60px]"
-                        >
-                          <span className="text-lg">👍</span>
-                          <span className="text-sm font-bold text-white">{q.upvotes}</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+          ) : (
+            <div className="sd-not-live">
+              <p>Cette session n'est pas en direct. Revenez pendant la session pour participer au Q&R !</p>
             </div>
-          </div>
-        ) : (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
-            <p className="text-gray-400">Cette session n'est pas en direct. Revenez pendant la session pour participer au Q&R !</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

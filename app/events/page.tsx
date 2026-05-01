@@ -17,24 +17,19 @@ export default function EventsPage() {
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
+  useEffect(() => { fetchEvents(); }, []);
 
   useEffect(() => {
-    // Filtrer les événements
     const filtered = allEvents.filter(event =>
       event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (event.location && event.location.toLowerCase().includes(searchTerm.toLowerCase()))
     );
     setFilteredEvents(filtered);
-    setCurrentPage(1); // Revenir à la première page après recherche
+    setCurrentPage(1);
   }, [searchTerm, allEvents]);
 
   const fetchEvents = async () => {
@@ -50,128 +45,103 @@ export default function EventsPage() {
     }
   };
 
-  // Pagination calculs
   const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedEvents = filteredEvents.slice(startIndex, startIndex + itemsPerPage);
-
-  const goToPage = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  };
+  const goToPage = (page: number) => setCurrentPage(Math.max(1, Math.min(page, totalPages)));
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh] bg-[#0a0a0f]">
-        <div className="text-gray-400">Chargement des événements...</div>
+      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'60vh', background:'var(--es-bg-1)' }}>
+        <div style={{ color: 'var(--es-text-2)' }}>Chargement des événements...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* En-tête */}
-        <div className="text-center mb-12">
-          <span className="inline-block text-sm font-bold tracking-wider text-[#6366f1] uppercase mb-3">
-            Découvrir
-          </span>
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent mb-4">
-            Tous nos événements
-          </h1>
-          <p className="text-gray-400 max-w-2xl mx-auto">
-            Des rencontres uniques pour explorer les technologies émergentes.
-          </p>
-        </div>
+    <>
+      <style>{`
+        .ep-page { min-height:100vh; background:var(--es-bg-1); padding:3rem 0; transition:background 0.25s ease; }
+        .ep-container { max-width:1280px; margin:0 auto; padding:0 1.5rem; }
+        .ep-header { text-align:center; margin-bottom:3rem; }
+        .ep-tag { display:inline-block; font-size:0.75rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--es-accent); margin-bottom:0.75rem; }
+        .ep-title { font-size:clamp(2rem,5vw,3rem); font-weight:800; background:linear-gradient(135deg,var(--es-text-1) 0%,var(--es-text-2) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:1rem; }
+        .ep-subtitle { color:var(--es-text-2); max-width:40rem; margin:0 auto; }
+        .ep-search-wrap { max-width:28rem; margin:0 auto 2rem; }
+        .ep-search-inner { position:relative; }
+        .ep-search-input { width:100%; background:var(--es-input-bg); border:1px solid var(--es-border); border-radius:0.75rem; padding:0.75rem 1rem; color:var(--es-text-1); outline:none; transition:border-color 0.2s,background 0.2s; font-size:0.95rem; box-sizing:border-box; }
+        .ep-search-input::placeholder { color:var(--es-text-3); }
+        .ep-search-input:focus { border-color:var(--es-accent); background:var(--es-input-bg-focus); }
+        .ep-search-clear { position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--es-text-2); cursor:pointer; }
+        .ep-search-clear:hover { color:var(--es-text-1); }
+        .ep-count { color:var(--es-text-3); font-size:0.85rem; text-align:center; margin-top:0.5rem; }
+        .ep-empty { text-align:center; padding:4rem 0; background:var(--es-surface); border:1px solid var(--es-border); border-radius:1rem; }
+        .ep-empty p { color:var(--es-text-2); }
+        .ep-empty-btn { background:none; border:none; color:var(--es-accent); cursor:pointer; margin-top:1rem; }
+        .ep-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; }
+        .ep-card { background:var(--es-surface); border:1px solid var(--es-border); border-radius:0.75rem; padding:1.5rem; transition:background 0.2s,border-color 0.2s,transform 0.2s; text-decoration:none; display:block; }
+        .ep-card:hover { background:var(--es-surface-hover); border-color:var(--es-border-hover); transform:translateY(-4px); }
+        .ep-card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; }
+        .ep-card-date { font-size:0.78rem; color:var(--es-text-3); }
+        .ep-card-title { font-size:1.15rem; font-weight:600; color:var(--es-text-1); margin-bottom:0.5rem; transition:color 0.2s; }
+        .ep-card:hover .ep-card-title { color:var(--es-accent); }
+        .ep-card-desc { color:var(--es-text-2); font-size:0.875rem; line-height:1.5; margin-bottom:1rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .ep-card-loc { display:flex; align-items:center; gap:0.5rem; font-size:0.875rem; color:var(--es-text-3); }
+        .ep-pagination { display:flex; justify-content:center; align-items:center; gap:0.75rem; margin-top:2.5rem; }
+        .ep-pag-btn { padding:0.5rem 1rem; background:var(--es-surface); border:1px solid var(--es-border); border-radius:0.5rem; color:var(--es-text-1); cursor:pointer; transition:background 0.2s; }
+        .ep-pag-btn:hover:not(:disabled) { background:var(--es-surface-hover); }
+        .ep-pag-btn:disabled { opacity:0.4; cursor:not-allowed; }
+        .ep-pag-info { color:var(--es-text-2); font-size:0.9rem; }
+      `}</style>
 
-        {/* Barre de recherche */}
-        <div className="max-w-md mx-auto mb-8">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="🔍 Rechercher un événement..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-lg py-3 px-4 text-white placeholder-gray-500 focus:outline-none focus:border-[#6366f1]"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-              >
-                ✕
-              </button>
-            )}
+      <div className="ep-page">
+        <div className="ep-container">
+          <div className="ep-header">
+            <span className="ep-tag">Découvrir</span>
+            <h1 className="ep-title">Tous nos événements</h1>
+            <p className="ep-subtitle">Des rencontres uniques pour explorer les technologies émergentes.</p>
           </div>
-          <p className="text-gray-500 text-sm mt-2 text-center">
-            {filteredEvents.length} événement(s) trouvé(s)
-          </p>
-        </div>
 
-        {/* Grille des événements */}
-        {filteredEvents.length === 0 ? (
-          <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
-            <p className="text-gray-400">Aucun événement trouvé</p>
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="mt-4 text-[#6366f1] hover:underline"
-              >
-                Effacer la recherche
-              </button>
-            )}
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {paginatedEvents.map((event) => (
-                <Link href={`/events/${event.id}`} key={event.id}>
-                  <div className="group bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="text-4xl">📅</div>
-                      <div className="text-xs text-gray-500">
-                        {new Date(event.startDate).toLocaleDateString('fr-FR')}
-                      </div>
-                    </div>
-                    <h2 className="text-xl font-semibold text-white mb-2 group-hover:text-[#a5b4fc] transition">
-                      {event.title}
-                    </h2>
-                    <p className="text-gray-400 text-sm line-clamp-2 mb-4">
-                      {event.description || 'Aucune description'}
-                    </p>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <span>📍</span>
-                      <span>{event.location || 'Lieu non spécifié'}</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+          <div className="ep-search-wrap">
+            <div className="ep-search-inner">
+              <input type="text" placeholder="🔍 Rechercher un événement..." value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)} className="ep-search-input" />
+              {searchTerm && <button onClick={() => setSearchTerm('')} className="ep-search-clear">✕</button>}
             </div>
+            <p className="ep-count">{filteredEvents.length} événement(s) trouvé(s)</p>
+          </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-8">
-                <button
-                  onClick={() => goToPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20 transition"
-                >
-                  ← Précédent
-                </button>
-                <span className="text-gray-400">
-                  Page {currentPage} sur {totalPages}
-                </span>
-                <button
-                  onClick={() => goToPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/20 transition"
-                >
-                  Suivant →
-                </button>
+          {filteredEvents.length === 0 ? (
+            <div className="ep-empty">
+              <p>Aucun événement trouvé</p>
+              {searchTerm && <button className="ep-empty-btn" onClick={() => setSearchTerm('')}>Effacer la recherche</button>}
+            </div>
+          ) : (
+            <>
+              <div className="ep-grid">
+                {paginatedEvents.map((event) => (
+                  <Link href={`/events/${event.id}`} key={event.id} className="ep-card">
+                    <div className="ep-card-top">
+                      <div style={{ fontSize:'2rem' }}>📅</div>
+                      <div className="ep-card-date">{new Date(event.startDate).toLocaleDateString('fr-FR')}</div>
+                    </div>
+                    <h2 className="ep-card-title">{event.title}</h2>
+                    <p className="ep-card-desc">{event.description || 'Aucune description'}</p>
+                    <div className="ep-card-loc"><span>📍</span><span>{event.location || 'Lieu non spécifié'}</span></div>
+                  </Link>
+                ))}
               </div>
-            )}
-          </>
-        )}
+              {totalPages > 1 && (
+                <div className="ep-pagination">
+                  <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="ep-pag-btn">← Précédent</button>
+                  <span className="ep-pag-info">Page {currentPage} sur {totalPages}</span>
+                  <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="ep-pag-btn">Suivant →</button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
