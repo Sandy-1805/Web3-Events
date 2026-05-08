@@ -1,28 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { toggleFavorite, isFavorite } from '@/app/favorites/page';
+import { toggleFavorite, isFavorite } from '@/lib/favorites';  // ← Changer le chemin
 
 interface FavoriteButtonProps {
   sessionId: number;
-  className?: string; // permet de customiser le style depuis le parent
+  className?: string;
 }
 
 export default function FavoriteButton({ sessionId, className = '' }: FavoriteButtonProps) {
-  // On initialise à false, puis on lit localStorage côté client
-  // (localStorage n'est pas disponible côté serveur → Next.js SSR)
   const [favorited, setFavorited] = useState(false);
 
   useEffect(() => {
-    // Lire l'état depuis localStorage au montage du composant
     setFavorited(isFavorite(sessionId));
   }, [sessionId]);
 
   const handleClick = (e: React.MouseEvent) => {
-    // Empêche le clic de remonter au parent (ex: un <Link>)
     e.preventDefault();
     e.stopPropagation();
-
     const added = toggleFavorite(sessionId);
     setFavorited(added);
   };

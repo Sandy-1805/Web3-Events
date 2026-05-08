@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import { AuthController } from '@/server/controllers/authController';
+
+const authController = new AuthController();
 
 export async function POST() {
-  const response = NextResponse.json({ success: true });
-  response.cookies.delete('token');
-  return response;
+  return await authController.logout();
 }

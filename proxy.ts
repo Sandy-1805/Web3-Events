@@ -13,7 +13,7 @@ const secret = new TextEncoder().encode(
   process.env.JWT_SECRET || 'your-secret-key'
 );
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const token = request.cookies.get('token');
   const { pathname } = request.nextUrl;
 

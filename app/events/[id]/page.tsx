@@ -259,7 +259,7 @@ export default function EventDetailPage() {
                   </label>
                   <DatePicker
                     selected={newSession.startTime}
-                    onChange={(date) => setNewSession({ ...newSession, startTime: date || new Date() })}
+                    onChange={(date: Date | null) => setNewSession({ ...newSession, startTime: date || new Date() })}
                     showTimeSelect
                     dateFormat="dd/MM/yyyy HH:mm"
                     timeFormat="HH:mm"
@@ -276,7 +276,7 @@ export default function EventDetailPage() {
                   </label>
                   <DatePicker
                     selected={newSession.endTime}
-                    onChange={(date) => setNewSession({ ...newSession, endTime: date || new Date() })}
+                    onChange={(date: Date | null) => setNewSession({ ...newSession, endTime: date || new Date() })}
                     showTimeSelect
                     dateFormat="dd/MM/yyyy HH:mm"
                     timeFormat="HH:mm"

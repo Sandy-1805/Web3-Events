@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     console.log('📝 Body reçu:', body);
-    
+
     const { title, description, startTime, endTime, room, capacity, eventId } = body;
 
     // Validation
