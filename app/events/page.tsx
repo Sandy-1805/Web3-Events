@@ -17,17 +17,25 @@ export default function EventsPage() {
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
   useEffect(() => { fetchEvents(); }, []);
 
   useEffect(() => {
-    const filtered = allEvents.filter(event =>
-      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (event.location && event.location.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const now = new Date();
+const filtered = allEvents.filter(event => {
+  const matchSearch =
+    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (event.location && event.location.toLowerCase().includes(searchTerm.toLowerCase()));
+  const matchFilter =
+    filter === 'all' ? true :
+    filter === 'upcoming' ? new Date(event.startDate) >= now :
+    new Date(event.startDate) < now;
+  return matchSearch && matchFilter;
+});
     setFilteredEvents(filtered);
     setCurrentPage(1);
   }, [searchTerm, allEvents]);
@@ -100,6 +108,19 @@ export default function EventsPage() {
             <span className="ep-tag">Découvrir</span>
             <h1 className="ep-title">Tous nos événements</h1>
             <p className="ep-subtitle">Des rencontres uniques pour explorer les technologies émergentes.</p>
+            <div style={{ display:'flex', justifyContent:'center', gap:'0.5rem', marginBottom:'2rem' }}>
+  {(['all','upcoming','past'] as const).map((f) => (
+    <button key={f} onClick={() => setFilter(f)}
+      style={{
+        padding:'6px 16px', borderRadius:'8px', border:'1px solid var(--es-border)',
+        background: filter === f ? 'var(--es-accent)' : 'var(--es-surface)',
+        color: filter === f ? '#fff' : 'var(--es-text-2)',
+        cursor:'pointer', fontSize:'0.85rem', fontWeight:600, transition:'all 0.2s'
+      }}>
+      {f === 'all' ? 'Tous' : f === 'upcoming' ? '🗓 À venir' : '✅ Passés'}
+    </button>
+  ))}
+</div>
           </div>
 
           <div className="ep-search-wrap">
