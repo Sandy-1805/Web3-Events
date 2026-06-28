@@ -1,18 +1,9 @@
+// components/admin/AdminApp.tsx
 'use client';
 
-/**
- * components/admin/AdminApp.tsx
- *
- * Point d'entrée React Admin — assemble toutes les ressources
- * avec leurs vues personnalisées (List, Edit, Create, Show).
- *
- * Plus de ListGuesser / EditGuesser : chaque ressource a ses propres
- * composants adaptés aux champs réels de l'API.
- */
-
 import { Admin, Resource } from 'react-admin';
+import { useEffect, useState } from 'react';
 import dataProvider from '@/lib/admin/dataProvider';
-import authProvider from '@/lib/admin/authProvider';
 
 // Ressource : Events
 import { EventList, EventEdit, EventCreate, EventShow } from './ressources/events';
@@ -20,20 +11,35 @@ import { EventList, EventEdit, EventCreate, EventShow } from './ressources/event
 import { SpeakerList, SpeakerEdit, SpeakerCreate, SpeakerShow } from './ressources/speakers';
 // Ressource : Sessions
 import { SessionList, SessionEdit, SessionCreate, SessionShow } from './ressources/sessions';
-// Ressource : Questions (lecture + suppression uniquement, pas d'édition)
+// Ressource : Questions
 import { QuestionList, QuestionShow } from './ressources/questions';
 
+const minimalAuthProvider = {
+  login: () => Promise.resolve(),
+  logout: () => { window.location.href = '/'; return Promise.resolve(); },
+  checkAuth: () => Promise.resolve(),
+  checkError: () => Promise.resolve(),
+  getIdentity: () => Promise.resolve({ id: 1, fullName: 'Admin' }),
+  getPermissions: () => Promise.resolve('admin'),
+};
+
 export default function AdminApp() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <Admin
       dataProvider={dataProvider}
-      authProvider={authProvider}
-      title="Web3-Events · Administration"
+      authProvider={minimalAuthProvider}
+      title="EventSync · Administration"
     >
-      {/**
-       * Events — CRUD complet
-       * API : GET/POST /api/events | GET/PUT/DELETE /api/events/[id]
-       */}
       <Resource
         name="events"
         options={{ label: 'Événements' }}
@@ -43,10 +49,6 @@ export default function AdminApp() {
         show={EventShow}
       />
 
-      {/**
-       * Speakers — CRUD complet
-       * API : GET/POST /api/speakers | GET/PUT/DELETE /api/speakers/[id]
-       */}
       <Resource
         name="speakers"
         options={{ label: 'Intervenants' }}
@@ -56,11 +58,6 @@ export default function AdminApp() {
         show={SpeakerShow}
       />
 
-      {/**
-       * Sessions — CRUD complet
-       * API : GET/POST /api/session | GET/PUT/DELETE /api/session/[id]
-       * Note : route singulier /api/session (voir dataProvider RESOURCE_MAP)
-       */}
       <Resource
         name="sessions"
         options={{ label: 'Sessions' }}
@@ -70,11 +67,6 @@ export default function AdminApp() {
         show={SessionShow}
       />
 
-      {/**
-       * Questions — lecture + suppression uniquement
-       * API : GET /api/questions | GET/DELETE /api/questions/[id]
-       * Pas de PUT → pas de formulaire d'édition exposé.
-       */}
       <Resource
         name="questions"
         options={{ label: 'Questions' }}
