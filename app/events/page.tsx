@@ -19,7 +19,7 @@ export default function EventsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 9;
 
   useEffect(() => { fetchEvents(); }, []);
 
@@ -38,7 +38,7 @@ const filtered = allEvents.filter(event => {
 });
     setFilteredEvents(filtered);
     setCurrentPage(1);
-  }, [searchTerm, allEvents]);
+  }, [searchTerm, filter, allEvents]);
 
   const fetchEvents = async () => {
     try {
