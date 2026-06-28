@@ -179,7 +179,7 @@ export default function HeroSection() {
             <div className="es-event-card-demo">
               <div className="es-card-header">
                 <div className="es-live-badge"><span className="es-live-dot" />Live</div>
-                <div className="es-card-date">28 Avr 2026</div>
+                <div className="es-card-date">{new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
               </div>
               <div className="es-card-title">Web3 Madagascar Summit</div>
               <div className="es-card-loc">📍 Antananarivo, Madagascar</div>
