@@ -95,10 +95,18 @@ export default function SessionDetailPage() {
   };
 
   if (loading) return (
-    <div style={{ minHeight:'100vh', background:'var(--es-bg-1)', padding:'3rem', display:'flex', alignItems:'center', justifyContent:'center' }}>
-      <div style={{ color:'var(--es-text-2)' }}>Chargement de la session...</div>
+  <div style={{ minHeight:'100vh', background:'var(--es-bg-1)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+    <div style={{ textAlign:'center' }}>
+      <div style={{
+        width:'40px', height:'40px', border:'3px solid var(--es-border)',
+        borderTopColor:'var(--es-accent)', borderRadius:'50%',
+        animation:'spin 0.8s linear infinite', margin:'0 auto 1rem'
+      }}/>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ color:'var(--es-text-2)', fontSize:'0.9rem' }}>Chargement de la session...</div>
     </div>
-  );
+  </div>
+);
 
   if (error || !session) return (
     <div style={{ minHeight:'100vh', background:'var(--es-bg-1)', padding:'3rem', textAlign:'center' }}>
@@ -172,7 +180,7 @@ export default function SessionDetailPage() {
             </div>
             {session.description && <p className="sd-desc">{session.description}</p>}
           </div>
-          
+
           {!live && questions.length > 0 && (
   <div style={{ marginBottom:'1rem', color:'var(--es-text-3)', fontSize:'0.9rem' }}>
     💬 {questions.length} question{questions.length > 1 ? 's' : ''} posée{questions.length > 1 ? 's' : ''} lors de cette session
