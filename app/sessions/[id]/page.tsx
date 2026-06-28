@@ -172,7 +172,12 @@ export default function SessionDetailPage() {
             </div>
             {session.description && <p className="sd-desc">{session.description}</p>}
           </div>
-
+          
+          {!live && questions.length > 0 && (
+  <div style={{ marginBottom:'1rem', color:'var(--es-text-3)', fontSize:'0.9rem' }}>
+    💬 {questions.length} question{questions.length > 1 ? 's' : ''} posée{questions.length > 1 ? 's' : ''} lors de cette session
+  </div>
+)}
           {live ? (
             <div className="sd-qa-grid">
               <div>
