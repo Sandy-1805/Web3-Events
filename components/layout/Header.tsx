@@ -39,7 +39,8 @@ export default function Header() {
   ];
 
   const isActive = (href: string) => pathname === href;
-
+ // Ne pas afficher le header sur les pages admin
+  if (pathname?.startsWith('/admin')) return null;
   return (
     <>
       <style>{`
