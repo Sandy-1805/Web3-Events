@@ -1,0 +1,713 @@
+/* app/admin/admin.css */
+
+/* ============================================================
+   EVENTSYNC ADMIN — Station de contrôle
+   Thème cohérent avec la landing page
+   ============================================================ */
+
+/* ===== VARIABLES ADMIN LOCALES ===== */
+.admin-layout {
+    --admin-glow-1: rgba(99, 102, 241, 0.12);
+    --admin-glow-2: rgba(139, 92, 246, 0.08);
+    --admin-glass: rgba(255, 255, 255, 0.03);
+    --admin-glass-border: rgba(255, 255, 255, 0.07);
+}
+
+/* ===== 1. LAYOUT GLOBAL ===== */
+.admin-layout {
+    background: var(--es-bg-1) !important;
+    color: var(--es-text-1) !important;
+    transition: background 0.25s ease, color 0.25s ease;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Fond nébuleux — même signature que la landing */
+.admin-layout::before {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.10) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.admin-layout::after {
+    content: '';
+    position: fixed;
+    bottom: -150px;
+    left: 50px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.06) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ===== 2. SIDEBAR ===== */
+[class*="RaSidebar"],
+[class*="MuiDrawer"] {
+    background: transparent !important;
+    z-index: 10 !important;
+}
+
+[class*="RaSidebar"] > div,
+[class*="MuiDrawer"] [class*="MuiPaper"] {
+    background: linear-gradient(
+            180deg,
+            rgba(10, 10, 15, 0.97) 0%,
+            rgba(20, 18, 40, 0.97) 50%,
+            rgba(10, 10, 15, 0.97) 100%
+    ) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.4) !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+/* Trait dégradé gauche de la sidebar — signature visuelle */
+[class*="RaSidebar"] > div::before,
+[class*="MuiDrawer"] [class*="MuiPaper"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(99, 102, 241, 0.6) 20%,
+            rgba(139, 92, 246, 0.8) 50%,
+            rgba(236, 72, 153, 0.4) 80%,
+            transparent 100%
+    );
+    z-index: 1;
+}
+
+/* Grille subtile dans la sidebar */
+[class*="RaSidebar"] > div::after,
+[class*="MuiDrawer"] [class*="MuiPaper"]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+            linear-gradient(rgba(99, 102, 241, 0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(99, 102, 241, 0.025) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ===== 3. APP BAR / HEADER ===== */
+[class*="RaAppBar"],
+[class*="MuiAppBar"] {
+    background: rgba(10, 10, 15, 0.88) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 24px rgba(0, 0, 0, 0.3) !important;
+    z-index: 20 !important;
+}
+
+[class*="RaAppBar"] [class*="MuiToolbar"],
+[class*="MuiAppBar"] [class*="MuiToolbar"] {
+    min-height: 64px !important;
+    padding: 0 24px !important;
+}
+
+/* Titre gradient multicolore */
+[class*="RaAppBar"] [class*="MuiTypography-h6"],
+[class*="MuiAppBar"] [class*="MuiTypography-h6"] {
+    font-weight: 800 !important;
+    font-size: 1.1rem !important;
+    letter-spacing: -0.02em !important;
+    background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 50%, #f472b6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+[class*="RaAppBar"] [class*="MuiIconButton"],
+[class*="MuiAppBar"] [class*="MuiIconButton"] {
+    color: var(--es-text-2) !important;
+    transition: color 0.2s, background 0.2s !important;
+    border-radius: 10px !important;
+}
+
+[class*="RaAppBar"] [class*="MuiIconButton"]:hover,
+[class*="MuiAppBar"] [class*="MuiIconButton"]:hover {
+    color: var(--es-text-1) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ===== 4. MENU ITEMS ===== */
+[class*="RaMenuItemLink"],
+[class*="RaMenu"] [class*="MuiMenuItem"] {
+    border-radius: 12px !important;
+    margin: 3px 10px !important;
+    padding: 10px 14px !important;
+    color: var(--es-text-2) !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+[class*="RaMenuItemLink"]:hover {
+    background: rgba(99, 102, 241, 0.08) !important;
+    color: var(--es-text-1) !important;
+    transform: translateX(3px) !important;
+}
+
+/* Item actif — barre lumineuse gauche (signature principale) */
+[class*="RaMenuItemLink"][class*="active"],
+[class*="RaMenuItemLink"][aria-current="page"] {
+    background: rgba(99, 102, 241, 0.12) !important;
+    color: #a5b4fc !important;
+    font-weight: 600 !important;
+}
+
+[class*="RaMenuItemLink"][class*="active"]::before,
+[class*="RaMenuItemLink"][aria-current="page"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    height: 60%;
+    width: 3px;
+    background: linear-gradient(180deg, #6366f1, #8b5cf6, #a855f7);
+    border-radius: 0 3px 3px 0;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
+}
+
+[class*="RaMenuItemLink"] [class*="MuiSvgIcon"] {
+    color: var(--es-text-3) !important;
+    font-size: 1.1rem !important;
+    transition: color 0.2s !important;
+}
+
+[class*="RaMenuItemLink"][class*="active"] [class*="MuiSvgIcon"],
+[class*="RaMenuItemLink"]:hover [class*="MuiSvgIcon"] {
+    color: #a5b4fc !important;
+}
+
+/* ===== 5. TITRE DE PAGE ===== */
+[class*="RaTitle"] h6,
+[class*="RaTitle"] [class*="MuiTypography"] {
+    font-size: 1.6rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.03em !important;
+    background: linear-gradient(135deg, var(--es-text-1) 30%, var(--es-text-2) 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+/* ===== 6. CARTES ===== */
+[class*="RaCard"],
+[class*="MuiCard-root"] {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    border-radius: 18px !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    box-shadow: none !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    animation: adminFadeInUp 0.35s ease-out !important;
+}
+
+[class*="RaCard"]:hover,
+[class*="MuiCard-root"]:hover {
+    border-color: rgba(99, 102, 241, 0.2) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(99, 102, 241, 0.08) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* ===== 7. DATAGRID / TABLEAU ===== */
+[class*="RaDatagrid"] {
+    background: transparent !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+}
+
+[class*="RaDatagrid"] table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    min-width: 800px !important;
+}
+
+[class*="RaDatagrid"] thead th {
+    background: rgba(99, 102, 241, 0.04) !important;
+    color: var(--es-text-3) !important;
+    font-weight: 700 !important;
+    font-size: 0.7rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    padding: 14px 20px !important;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.12) !important;
+    white-space: nowrap !important;
+}
+
+[class*="RaDatagrid"] tbody tr {
+    transition: all 0.15s ease !important;
+    animation: adminFadeInUp 0.3s ease-out !important;
+    animation-fill-mode: backwards !important;
+}
+
+[class*="RaDatagrid"] tbody tr:nth-child(1)  { animation-delay: 0.02s !important; }
+[class*="RaDatagrid"] tbody tr:nth-child(2)  { animation-delay: 0.04s !important; }
+[class*="RaDatagrid"] tbody tr:nth-child(3)  { animation-delay: 0.06s !important; }
+[class*="RaDatagrid"] tbody tr:nth-child(4)  { animation-delay: 0.08s !important; }
+[class*="RaDatagrid"] tbody tr:nth-child(5)  { animation-delay: 0.10s !important; }
+[class*="RaDatagrid"] tbody tr:nth-child(6)  { animation-delay: 0.12s !important; }
+[class*="RaDatagrid"] tbody tr:nth-child(7)  { animation-delay: 0.14s !important; }
+[class*="RaDatagrid"] tbody tr:nth-child(8)  { animation-delay: 0.16s !important; }
+[class*="RaDatagrid"] tbody tr:nth-child(9)  { animation-delay: 0.18s !important; }
+[class*="RaDatagrid"] tbody tr:nth-child(10) { animation-delay: 0.20s !important; }
+
+[class*="RaDatagrid"] tbody tr:hover {
+    background: rgba(99, 102, 241, 0.05) !important;
+}
+
+[class*="RaDatagrid"] tbody tr[aria-selected="true"] {
+    background: rgba(99, 102, 241, 0.08) !important;
+}
+
+[class*="RaDatagrid"] tbody td {
+    padding: 14px 20px !important;
+    font-size: 0.88rem !important;
+    color: var(--es-text-1) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    vertical-align: middle !important;
+}
+
+[class*="RaDatagrid"] [class*="MuiCheckbox"] {
+    color: var(--es-text-3) !important;
+}
+
+[class*="RaDatagrid"] [class*="MuiCheckbox"][class*="checked"] {
+    color: var(--es-accent) !important;
+}
+
+/* Colonnes */
+[class*="RaDatagrid"] th:first-child,
+[class*="RaDatagrid"] td:first-child {
+    width: 60px !important;
+    min-width: 60px !important;
+}
+
+[class*="RaDatagrid"] th:last-child,
+[class*="RaDatagrid"] td:last-child {
+    text-align: right !important;
+    min-width: 160px !important;
+    white-space: nowrap !important;
+}
+
+/* ===== 8. BOUTONS ===== */
+[class*="RaCreateButton"],
+[class*="RaSaveButton"],
+button[class*="MuiButton-containedPrimary"] {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    text-transform: none !important;
+    padding: 8px 20px !important;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3) !important;
+    transition: all 0.2s ease !important;
+    letter-spacing: 0 !important;
+}
+
+[class*="RaCreateButton"]:hover,
+[class*="RaSaveButton"]:hover,
+button[class*="MuiButton-containedPrimary"]:hover {
+    opacity: 0.9 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5) !important;
+}
+
+button[class*="MuiButton-outlined"] {
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: var(--es-text-1) !important;
+    border-radius: 10px !important;
+    text-transform: none !important;
+    font-weight: 500 !important;
+    transition: all 0.2s !important;
+}
+
+button[class*="MuiButton-outlined"]:hover {
+    border-color: rgba(99, 102, 241, 0.35) !important;
+    background: rgba(99, 102, 241, 0.06) !important;
+}
+
+button[class*="MuiButton-text"] {
+    color: var(--es-text-2) !important;
+    text-transform: none !important;
+    font-weight: 500 !important;
+    border-radius: 8px !important;
+    transition: all 0.2s !important;
+}
+
+button[class*="MuiButton-text"]:hover {
+    color: #a5b4fc !important;
+    background: rgba(99, 102, 241, 0.08) !important;
+}
+
+[class*="RaDeleteButton"] {
+    color: #fb7185 !important;
+    border-radius: 10px !important;
+    text-transform: none !important;
+}
+
+[class*="RaDeleteButton"]:hover {
+    background: rgba(244, 63, 94, 0.1) !important;
+}
+
+/* ===== 9. FORMULAIRES ===== */
+[class*="RaSimpleForm"],
+[class*="RaTabbedForm"] {
+    background: rgba(255, 255, 255, 0.025) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    border-radius: 18px !important;
+    padding: 28px !important;
+}
+
+[class*="MuiFormLabel"],
+[class*="MuiInputLabel"] {
+    color: var(--es-text-3) !important;
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+}
+
+[class*="MuiFormLabel"][class*="focused"],
+[class*="MuiInputLabel"][class*="focused"] {
+    color: #a5b4fc !important;
+}
+
+[class*="MuiOutlinedInput-root"] {
+    background: var(--es-input-bg) !important;
+    border-radius: 12px !important;
+    color: var(--es-text-1) !important;
+    font-size: 0.9rem !important;
+    transition: all 0.2s !important;
+}
+
+[class*="MuiOutlinedInput-root"] [class*="MuiOutlinedInput-notchedOutline"] {
+    border-color: var(--es-border) !important;
+    border-radius: 12px !important;
+    transition: border-color 0.2s !important;
+}
+
+[class*="MuiOutlinedInput-root"]:hover [class*="MuiOutlinedInput-notchedOutline"] {
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+[class*="MuiOutlinedInput-root"][class*="focused"] [class*="MuiOutlinedInput-notchedOutline"] {
+    border-color: var(--es-accent) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+}
+
+[class*="MuiOutlinedInput-root"] input,
+[class*="MuiOutlinedInput-root"] textarea {
+    color: var(--es-text-1) !important;
+}
+
+[class*="MuiOutlinedInput-root"] input::placeholder,
+[class*="MuiOutlinedInput-root"] textarea::placeholder {
+    color: var(--es-text-3) !important;
+}
+
+/* Dropdown menus */
+[class*="MuiMenuItem"] {
+    color: var(--es-text-1) !important;
+    background: var(--es-bg-2) !important;
+    transition: background 0.15s !important;
+}
+
+[class*="MuiMenuItem"]:hover {
+    background: rgba(99, 102, 241, 0.1) !important;
+    color: #a5b4fc !important;
+}
+
+[class*="MuiMenuItem"][class*="selected"] {
+    background: rgba(99, 102, 241, 0.14) !important;
+    color: #a5b4fc !important;
+}
+
+[class*="MuiPaper-root"] {
+    background: var(--es-bg-2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ===== 10. TOOLBAR ===== */
+[class*="RaList"] [class*="MuiToolbar"] {
+    background: transparent !important;
+    padding: 16px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    margin-bottom: 16px !important;
+}
+
+[class*="RaToolbar"] {
+    background: rgba(99, 102, 241, 0.04) !important;
+    border-top: 1px solid rgba(99, 102, 241, 0.1) !important;
+    padding: 16px 24px !important;
+    border-radius: 0 0 18px 18px !important;
+    display: flex !important;
+    gap: 12px !important;
+}
+
+/* ===== 11. FILTRES / SEARCH ===== */
+[class*="RaFilterForm"],
+[class*="RaFilter"] {
+    background: rgba(255, 255, 255, 0.025) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 14px !important;
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+}
+
+/* ===== 12. PAGINATION ===== */
+[class*="RaPagination"],
+[class*="MuiTablePagination"] {
+    padding: 12px 20px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+    color: var(--es-text-2) !important;
+}
+
+[class*="MuiTablePagination"] [class*="MuiIconButton"] {
+    color: var(--es-text-2) !important;
+    border-radius: 8px !important;
+    transition: all 0.2s !important;
+}
+
+[class*="MuiTablePagination"] [class*="MuiIconButton"]:hover {
+    color: #a5b4fc !important;
+    background: rgba(99, 102, 241, 0.1) !important;
+}
+
+[class*="MuiTablePagination"] [class*="MuiIconButton"]:disabled {
+    opacity: 0.3 !important;
+}
+
+/* ===== 13. NOTIFICATIONS ===== */
+[class*="RaNotification"] [class*="MuiSnackbarContent"],
+[class*="MuiSnackbar"] [class*="MuiPaper"] {
+    backdrop-filter: blur(12px) !important;
+    border-radius: 14px !important;
+}
+
+[class*="MuiAlert-colorSuccess"] {
+    background: rgba(34, 197, 94, 0.12) !important;
+    border: 1px solid rgba(34, 197, 94, 0.25) !important;
+    color: #4ade80 !important;
+}
+
+[class*="MuiAlert-colorError"] {
+    background: rgba(244, 63, 94, 0.12) !important;
+    border: 1px solid rgba(244, 63, 94, 0.25) !important;
+    color: #fb7185 !important;
+}
+
+/* ===== 14. BADGES / CHIPS ===== */
+[class*="MuiChip"] {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    height: auto !important;
+    padding: 3px 0 !important;
+}
+
+[class*="MuiChip"][class*="colorPrimary"] {
+    background: rgba(99, 102, 241, 0.15) !important;
+    color: #a5b4fc !important;
+    border: 1px solid rgba(99, 102, 241, 0.25) !important;
+}
+
+[class*="MuiChip"][class*="colorSuccess"] {
+    background: rgba(34, 197, 94, 0.12) !important;
+    color: #4ade80 !important;
+    border: 1px solid rgba(34, 197, 94, 0.2) !important;
+}
+
+[class*="MuiChip"][class*="colorError"] {
+    background: rgba(244, 63, 94, 0.12) !important;
+    color: #fb7185 !important;
+    border: 1px solid rgba(244, 63, 94, 0.2) !important;
+}
+
+/* ===== 15. LOADING ===== */
+[class*="RaLoading"],
+[class*="RaLoadingPage"] {
+    background: var(--es-bg-1) !important;
+}
+
+[class*="MuiCircularProgress"] {
+    color: var(--es-accent) !important;
+}
+
+/* ===== 16. DIVIDER ===== */
+[class*="MuiDivider"] {
+    border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ===== 17. RESPONSIVE ===== */
+@media (max-width: 768px) {
+    [class*="RaDatagrid"] table {
+        font-size: 0.82rem !important;
+    }
+
+    [class*="RaDatagrid"] thead th,
+    [class*="RaDatagrid"] tbody td {
+        padding: 10px 12px !important;
+    }
+
+    [class*="RaSimpleForm"],
+    [class*="RaTabbedForm"] {
+        padding: 16px !important;
+    }
+}
+
+/* ===== 18. SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.25);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.45);
+}
+
+/* ===== 19. ANIMATIONS ===== */
+@keyframes adminFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== 20. LIGHT MODE OVERRIDES ===== */
+[data-theme="light"] .admin-layout::before {
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, transparent 65%);
+}
+
+[data-theme="light"] .admin-layout::after {
+    background: radial-gradient(circle, rgba(219, 39, 119, 0.04) 0%, transparent 65%);
+}
+
+[data-theme="light"] [class*="RaSidebar"] > div,
+[data-theme="light"] [class*="MuiDrawer"] [class*="MuiPaper"] {
+    background: linear-gradient(
+            180deg,
+            rgba(248, 249, 252, 0.98) 0%,
+            rgba(241, 238, 255, 0.98) 50%,
+            rgba(248, 249, 252, 0.98) 100%
+    ) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] [class*="RaAppBar"],
+[data-theme="light"] [class*="MuiAppBar"] {
+    background: rgba(248, 249, 252, 0.94) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] [class*="RaMenuItemLink"] {
+    color: var(--es-text-2) !important;
+}
+
+[data-theme="light"] [class*="RaMenuItemLink"]:hover {
+    background: rgba(79, 70, 229, 0.06) !important;
+    color: var(--es-accent) !important;
+}
+
+[data-theme="light"] [class*="RaMenuItemLink"][class*="active"] {
+    background: rgba(79, 70, 229, 0.09) !important;
+    color: var(--es-accent) !important;
+}
+
+[data-theme="light"] [class*="RaMenuItemLink"][class*="active"] [class*="MuiSvgIcon"],
+[data-theme="light"] [class*="RaMenuItemLink"]:hover [class*="MuiSvgIcon"] {
+    color: var(--es-accent) !important;
+}
+
+[data-theme="light"] [class*="RaCard"],
+[data-theme="light"] [class*="MuiCard-root"] {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] [class*="MuiPaper-root"] {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] [class*="MuiOutlinedInput-root"] {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme="light"] [class*="MuiMenuItem"] {
+    background: #ffffff !important;
+}
+
+[data-theme="light"] [class*="MuiMenuItem"]:hover {
+    background: rgba(79, 70, 229, 0.06) !important;
+    color: var(--es-accent) !important;
+}
+
+[data-theme="light"] [class*="RaList"] [class*="MuiToolbar"] {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] [class*="MuiDivider"] {
+    border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] [class*="RaDatagrid"] thead th {
+    background: rgba(79, 70, 229, 0.04) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] [class*="RaDatagrid"] tbody td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] [class*="RaDatagrid"] tbody tr:hover {
+    background: rgba(79, 70, 229, 0.04) !important;
+}
