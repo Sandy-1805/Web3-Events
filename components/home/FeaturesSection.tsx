@@ -48,7 +48,7 @@ export default function FeaturesSection() {
     <>
       <style>{`
         .es-features {
-          background: #0d0d14;
+          background: var(--es-bg-3);
           padding: 6rem 2rem;
         }
         .es-features-inner {
@@ -61,19 +61,19 @@ export default function FeaturesSection() {
           font-weight: 700;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #6366f1;
+          color: var(--es-accent);
           margin-bottom: 1rem;
         }
         .es-section-title {
           font-size: clamp(1.8rem, 3vw, 2.8rem);
           font-weight: 800;
-          color: #f1f5f9;
+          color: var(--es-text-1);
           margin: 0 0 1rem;
           letter-spacing: -0.02em;
         }
         .es-section-sub {
           font-size: 1rem;
-          color: #64748b;
+          color: var(--es-text-3);
           max-width: 500px;
           line-height: 1.7;
           margin: 0 0 3.5rem;
@@ -84,15 +84,15 @@ export default function FeaturesSection() {
           gap: 1.25rem;
         }
         .es-feature-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: var(--es-surface);
+          border: 1px solid var(--es-border);
           border-radius: 16px;
           padding: 1.75rem;
           transition: border-color 0.2s, background 0.2s, transform 0.2s;
         }
         .es-feature-card:hover {
-          border-color: rgba(255,255,255,0.15);
-          background: rgba(255,255,255,0.05);
+          border-color: var(--es-border-hover);
+          background: var(--es-surface-hover);
           transform: translateY(-3px);
         }
         .es-feature-icon {
@@ -108,12 +108,12 @@ export default function FeaturesSection() {
         .es-feature-title {
           font-size: 1rem;
           font-weight: 700;
-          color: #e2e8f0;
+          color: var(--es-text-1);
           margin: 0 0 0.5rem;
         }
         .es-feature-desc {
           font-size: 0.88rem;
-          color: #64748b;
+          color: var(--es-text-3);
           line-height: 1.65;
           margin: 0;
         }
