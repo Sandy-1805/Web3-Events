@@ -25,7 +25,7 @@ export default function Dashboard() {
                     dataProvider.getList('users', { pagination: { page: 1, perPage: 1 }, sort: { field: 'id', order: 'ASC' }, filter: {} }),
                 ]);
                 setStats({
-                    events: events.total || 0,    // ✅ Fallback si undefined
+                    events: events.total || 0,
                     sessions: sessions.total || 0,
                     speakers: speakers.total || 0,
                     users: users.total || 0,
@@ -40,7 +40,11 @@ export default function Dashboard() {
     }, [dataProvider]);
 
     if (loading) {
-        return <Box sx={{ p: 3 }}><Typography>Loading...</Typography></Box>;
+        return (
+            <Box sx={{ p: 3 }}>
+                <Typography>Loading...</Typography>
+            </Box>
+        );
     }
 
     const statItems = [
@@ -58,10 +62,8 @@ export default function Dashboard() {
 
             <Grid container spacing={3}>
                 {statItems.map((stat) => (
-                    <Grid
-                        key={stat.label}
-                        size={{ xs: 12, sm: 6, md: 3 }}  // ✅ Utiliser 'size' au lieu de 'item' + 'xs'/'sm'/'md'
-                    >
+                    // ✅ Utilisation de 'size' au lieu de 'item xs sm md'
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }} key={stat.label}>
                         <Card sx={{
                             background: 'var(--es-surface)',
                             border: '1px solid var(--es-border)',

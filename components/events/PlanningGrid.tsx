@@ -39,14 +39,14 @@ function formatTime(date: Date): string {
     return new Date(date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
 
-// Room color accents
+// Room color accents — hue-only, opacity adapts to theme via CSS vars
 const ROOM_COLORS = [
-    { dot: '#6366f1', bg: 'rgba(99,102,241,0.12)', border: 'rgba(99,102,241,0.25)', text: '#a5b4fc' },
-    { dot: '#ec4899', bg: 'rgba(236,72,153,0.12)', border: 'rgba(236,72,153,0.25)', text: '#f9a8d4' },
-    { dot: '#14b8a6', bg: 'rgba(20,184,166,0.12)', border: 'rgba(20,184,166,0.25)', text: '#5eead4' },
-    { dot: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.25)', text: '#fcd34d' },
-    { dot: '#22c55e', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.25)', text: '#86efac' },
-    { dot: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.25)', text: '#c4b5fd' },
+    { dot: '#6366f1', bg: 'rgba(99,102,241,0.12)',  border: 'rgba(99,102,241,0.25)',  text: '#a5b4fc' },
+    { dot: '#ec4899', bg: 'rgba(236,72,153,0.12)',  border: 'rgba(236,72,153,0.25)',  text: '#f9a8d4' },
+    { dot: '#14b8a6', bg: 'rgba(20,184,166,0.12)',  border: 'rgba(20,184,166,0.25)',  text: '#5eead4' },
+    { dot: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.25)',  text: '#fcd34d' },
+    { dot: '#22c55e', bg: 'rgba(34,197,94,0.12)',   border: 'rgba(34,197,94,0.25)',   text: '#86efac' },
+    { dot: '#8b5cf6', bg: 'rgba(139,92,246,0.12)',  border: 'rgba(139,92,246,0.25)',  text: '#c4b5fd' },
 ];
 
 export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridProps) {
@@ -123,16 +123,22 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                             borderRadius: '100px',
                             padding: '0.35rem 0.85rem',
                         }}>
-              <span style={{
-                  width: 8, height: 8,
-                  borderRadius: '50%',
-                  background: '#f43f5e',
-                  display: 'inline-block',
-                  animation: 'pulse-live 1.5s ease-in-out infinite',
-              }} />
-                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fb7185', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {liveCount} session{liveCount > 1 ? 's' : ''} en cours
-              </span>
+                            <span style={{
+                                width: 8, height: 8,
+                                borderRadius: '50%',
+                                background: '#f43f5e',
+                                display: 'inline-block',
+                                animation: 'pulse-live 1.5s ease-in-out infinite',
+                            }} />
+                            <span style={{
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                color: '#fb7185',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em',
+                            }}>
+                                {liveCount} session{liveCount > 1 ? 's' : ''} en cours
+                            </span>
                         </div>
                     )}
                 </div>
@@ -142,8 +148,8 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                     {/* View toggle */}
                     <div style={{
                         display: 'flex',
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.08)',
+                        background: 'var(--es-surface)',
+                        border: '1px solid var(--es-border)',
                         borderRadius: '10px',
                         padding: '3px',
                     }}>
@@ -159,7 +165,7 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                                     fontSize: '0.8rem',
                                     fontWeight: 600,
                                     background: viewMode === mode ? 'rgba(99,102,241,0.2)' : 'transparent',
-                                    color: viewMode === mode ? '#a5b4fc' : '#64748b',
+                                    color: viewMode === mode ? 'var(--es-accent)' : 'var(--es-text-3)',
                                     transition: 'all 0.15s',
                                 }}
                             >
@@ -178,9 +184,9 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                     style={{
                         padding: '0.35rem 1rem',
                         borderRadius: '100px',
-                        border: `1px solid ${activeRoom === null ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                        border: `1px solid ${activeRoom === null ? 'rgba(99,102,241,0.5)' : 'var(--es-border)'}`,
                         background: activeRoom === null ? 'rgba(99,102,241,0.15)' : 'transparent',
-                        color: activeRoom === null ? '#a5b4fc' : '#64748b',
+                        color: activeRoom === null ? 'var(--es-accent)' : 'var(--es-text-3)',
                         fontSize: '0.8rem',
                         fontWeight: 600,
                         cursor: 'pointer',
@@ -202,9 +208,9 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                                 gap: '0.4rem',
                                 padding: '0.35rem 1rem',
                                 borderRadius: '100px',
-                                border: `1px solid ${isActive ? color.border : 'rgba(255,255,255,0.08)'}`,
+                                border: `1px solid ${isActive ? color.border : 'var(--es-border)'}`,
                                 background: isActive ? color.bg : 'transparent',
-                                color: isActive ? color.text : '#64748b',
+                                color: isActive ? color.text : 'var(--es-text-3)',
                                 fontSize: '0.8rem',
                                 fontWeight: 600,
                                 cursor: 'pointer',
@@ -218,23 +224,97 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                 })}
             </div>
 
-            {/* CSS keyframe for live pulse */}
+            {/* CSS keyframes */}
             <style>{`
-        @keyframes pulse-live {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(0.85); }
-        }
-        @keyframes live-glow {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(244,63,94,0.0); }
-          50% { box-shadow: 0 0 12px 2px rgba(244,63,94,0.15); }
-        }
-        .session-card-link:hover .session-inner {
-          border-color: rgba(255,255,255,0.18) !important;
-          background: rgba(255,255,255,0.07) !important;
-          transform: translateY(-2px);
-        }
-        .fav-btn:hover { opacity: 0.8; }
-      `}</style>
+                @keyframes pulse-live {
+                    0%, 100% { opacity: 1; transform: scale(1); }
+                    50% { opacity: 0.5; transform: scale(0.85); }
+                }
+                @keyframes live-glow {
+                    0%, 100% { box-shadow: 0 0 0 0 rgba(244,63,94,0.0); }
+                    50% { box-shadow: 0 0 12px 2px rgba(244,63,94,0.15); }
+                }
+                .session-card-link:hover .session-inner {
+                    border-color: var(--es-border-hover) !important;
+                    background: var(--es-surface-hover) !important;
+                    transform: translateY(-2px);
+                }
+                .fav-btn:hover { opacity: 0.8; }
+
+                /* Time divider line */
+                .pg-time-divider {
+                    flex: 1;
+                    height: 1px;
+                    background: var(--es-border);
+                }
+                /* Grid empty cell */
+                .pg-empty-cell {
+                    background: var(--es-surface);
+                    border: 1px solid var(--es-border);
+                    border-radius: 12px;
+                    min-height: 80px;
+                    opacity: 0.5;
+                }
+                /* Grid room header */
+                .pg-room-header {
+                    background: var(--es-surface);
+                    border: 1px solid var(--es-border);
+                    border-radius: 12px 12px 0 0;
+                    padding: 0.85rem 1rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    transition: background 0.25s ease, border-color 0.25s ease;
+                }
+                /* Time label */
+                .pg-time-label {
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+                    padding-top: 1rem;
+                    color: var(--es-text-3);
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    letter-spacing: 0.03em;
+                }
+                /* Session title */
+                .pg-session-title {
+                    font-weight: 700;
+                    font-size: 0.9rem;
+                    color: var(--es-text-1);
+                    line-height: 1.35;
+                    margin: 0;
+                }
+                /* Speaker name */
+                .pg-speaker-name {
+                    font-size: 0.72rem;
+                    color: var(--es-text-3);
+                    display: flex;
+                    align-items: center;
+                    gap: 0.3rem;
+                }
+                /* List view: session title */
+                .pg-list-title {
+                    font-weight: 700;
+                    font-size: 0.95rem;
+                    color: var(--es-text-1);
+                    margin: 0;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                /* List view: speaker */
+                .pg-list-speaker {
+                    font-size: 0.78rem;
+                    color: var(--es-text-3);
+                    margin: 0.25rem 0 0;
+                }
+                /* List view: time */
+                .pg-list-time {
+                    font-size: 0.72rem;
+                    color: var(--es-text-2);
+                }
+            `}</style>
 
             {/* ─── GRID VIEW ─── */}
             {viewMode === 'grid' && (
@@ -245,25 +325,14 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                         gap: '2px',
                         minWidth: filteredRooms.length > 1 ? `${80 + filteredRooms.length * 220}px` : 'auto',
                     }}>
-                        {/* Header row: time col + room cols */}
+                        {/* Header row */}
                         <div style={{ padding: '0.75rem 0', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
-                        {filteredRooms.map((room, i) => {
+                        {filteredRooms.map((room) => {
                             const color = ROOM_COLORS[rooms.indexOf(room) % ROOM_COLORS.length];
                             return (
-                                <div
-                                    key={room}
-                                    style={{
-                                        background: 'rgba(255,255,255,0.03)',
-                                        border: '1px solid rgba(255,255,255,0.06)',
-                                        borderRadius: '12px 12px 0 0',
-                                        padding: '0.85rem 1rem',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                    }}
-                                >
+                                <div key={room} className="pg-room-header">
                                     <span style={{ width: 8, height: 8, borderRadius: '50%', background: color.dot, flexShrink: 0 }} />
-                                    <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#f1f5f9' }}>{room}</span>
+                                    <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--es-text-1)' }}>{room}</span>
                                 </div>
                             );
                         })}
@@ -274,20 +343,7 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                             return (
                                 <React.Fragment key={slot}>
                                     {/* Time label */}
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'flex-start',
-                                            justifyContent: 'center',
-                                            paddingTop: '1rem',
-                                            color: '#475569',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 700,
-                                            letterSpacing: '0.03em',
-                                        }}
-                                    >
-                                        {formatTime(slotDate)}
-                                    </div>
+                                    <div className="pg-time-label">{formatTime(slotDate)}</div>
 
                                     {/* Session cells */}
                                     {filteredRooms.map((room) => {
@@ -295,21 +351,13 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                                         const session = sessionMap[key];
                                         const roomIdx = rooms.indexOf(room);
                                         const color = ROOM_COLORS[roomIdx % ROOM_COLORS.length];
-                                        const live = session ? (now >= new Date(session.startTime) && now <= new Date(session.endTime)) : false;
+                                        const live = session
+                                            ? (now >= new Date(session.startTime) && now <= new Date(session.endTime))
+                                            : false;
                                         const isFav = session ? favorites.includes(session.id) : false;
 
                                         if (!session) {
-                                            return (
-                                                <div
-                                                    key={key}
-                                                    style={{
-                                                        background: 'rgba(255,255,255,0.015)',
-                                                        border: '1px solid rgba(255,255,255,0.04)',
-                                                        borderRadius: 12,
-                                                        minHeight: 80,
-                                                    }}
-                                                />
-                                            );
+                                            return <div key={key} className="pg-empty-cell" />;
                                         }
 
                                         return (
@@ -339,32 +387,30 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                             {live && (
-                                                                <span className="es-badge-live" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', backgroundColor: 'rgba(244,63,94,0.15)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '100px', padding: '0.25rem 0.6rem', fontSize: '0.65rem', fontWeight: 700, color: '#fb7185' }}>
-                                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f43f5e', display: 'inline-block', animation: 'pulse-live 1.5s ease-in-out infinite' }} />
-                                  Live
-                                </span>
+                                                                <span style={{
+                                                                    display: 'flex', alignItems: 'center', gap: '0.3rem',
+                                                                    backgroundColor: 'rgba(244,63,94,0.15)',
+                                                                    border: '1px solid rgba(244,63,94,0.3)',
+                                                                    borderRadius: '100px', padding: '0.25rem 0.6rem',
+                                                                    fontSize: '0.65rem', fontWeight: 700, color: '#fb7185',
+                                                                }}>
+                                                                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f43f5e', display: 'inline-block', animation: 'pulse-live 1.5s ease-in-out infinite' }} />
+                                                                    Live
+                                                                </span>
                                                             )}
-                                                            <span style={{
-                                                                fontSize: '0.7rem',
-                                                                color: color.text,
-                                                                fontWeight: 600,
-                                                            }}>
-                                {formatTime(new Date(session.startTime))} – {formatTime(new Date(session.endTime))}
-                              </span>
+                                                            <span style={{ fontSize: '0.7rem', color: color.text, fontWeight: 600 }}>
+                                                                {formatTime(new Date(session.startTime))} – {formatTime(new Date(session.endTime))}
+                                                            </span>
                                                         </div>
                                                         <button
                                                             className="fav-btn"
                                                             onClick={(e) => toggleFavorite(e, session.id)}
                                                             title={isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}
                                                             style={{
-                                                                background: 'none',
-                                                                border: 'none',
-                                                                cursor: 'pointer',
+                                                                background: 'none', border: 'none', cursor: 'pointer',
                                                                 fontSize: '0.9rem',
-                                                                color: isFav ? '#fbbf24' : '#334155',
-                                                                transition: 'color 0.15s',
-                                                                padding: '2px',
-                                                                lineHeight: 1,
+                                                                color: isFav ? '#fbbf24' : 'var(--es-text-3)',
+                                                                transition: 'color 0.15s', padding: '2px', lineHeight: 1,
                                                             }}
                                                         >
                                                             {isFav ? '★' : '☆'}
@@ -372,47 +418,23 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                                                     </div>
 
                                                     {/* Title */}
-                                                    <p style={{
-                                                        fontWeight: 700,
-                                                        fontSize: '0.9rem',
-                                                        color: '#f1f5f9',
-                                                        lineHeight: 1.35,
-                                                        margin: 0,
-                                                    }}>
-                                                        {session.title}
-                                                    </p>
+                                                    <p className="pg-session-title">{session.title}</p>
 
                                                     {/* Speakers */}
                                                     {session.speakers.length > 0 && (
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', marginTop: 'auto' }}>
                                                             {session.speakers.map((sp) => (
-                                                                <span
-                                                                    key={sp.id}
-                                                                    style={{
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        gap: '0.3rem',
-                                                                        fontSize: '0.72rem',
-                                                                        color: '#64748b',
-                                                                    }}
-                                                                >
-                                  <span style={{
-                                      width: 18, height: 18,
-                                      borderRadius: '50%',
-                                      background: color.bg,
-                                      border: `1px solid ${color.border}`,
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      fontSize: '0.6rem',
-                                      fontWeight: 700,
-                                      color: color.text,
-                                      flexShrink: 0,
-                                  }}>
-                                    {sp.name.charAt(0).toUpperCase()}
-                                  </span>
+                                                                <span key={sp.id} className="pg-speaker-name">
+                                                                    <span style={{
+                                                                        width: 18, height: 18, borderRadius: '50%',
+                                                                        background: color.bg, border: `1px solid ${color.border}`,
+                                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                        fontSize: '0.6rem', fontWeight: 700, color: color.text, flexShrink: 0,
+                                                                    }}>
+                                                                        {sp.name.charAt(0).toUpperCase()}
+                                                                    </span>
                                                                     {sp.name}
-                                </span>
+                                                                </span>
                                                             ))}
                                                         </div>
                                                     )}
@@ -442,22 +464,17 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                             <div key={slot}>
                                 {/* Time divider */}
                                 <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.75rem',
-                                    marginBottom: '0.6rem',
-                                    marginTop: '0.5rem',
+                                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                    marginBottom: '0.6rem', marginTop: '0.5rem',
                                 }}>
-                  <span style={{
-                      fontWeight: 800,
-                      fontSize: '0.85rem',
-                      color: '#94a3b8',
-                      letterSpacing: '0.04em',
-                      flexShrink: 0,
-                  }}>
-                    {formatTime(new Date(slot))}
-                  </span>
-                                    <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+                                    <span style={{
+                                        fontWeight: 800, fontSize: '0.85rem',
+                                        color: 'var(--es-text-2)',
+                                        letterSpacing: '0.04em', flexShrink: 0,
+                                    }}>
+                                        {formatTime(new Date(slot))}
+                                    </span>
+                                    <div className="pg-time-divider" />
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -477,11 +494,9 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                                                 <div
                                                     className="session-inner"
                                                     style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '1rem',
-                                                        background: live ? 'rgba(244,63,94,0.07)' : 'rgba(255,255,255,0.03)',
-                                                        border: `1px solid ${live ? 'rgba(244,63,94,0.25)' : 'rgba(255,255,255,0.08)'}`,
+                                                        display: 'flex', alignItems: 'center', gap: '1rem',
+                                                        background: live ? 'rgba(244,63,94,0.07)' : 'var(--es-surface)',
+                                                        border: `1px solid ${live ? 'rgba(244,63,94,0.25)' : 'var(--es-border)'}`,
                                                         borderRadius: 12,
                                                         padding: '0.85rem 1.25rem',
                                                         transition: 'all 0.2s ease',
@@ -490,34 +505,35 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                                                 >
                                                     {/* Room color bar */}
                                                     <div style={{
-                                                        width: 4,
-                                                        height: 48,
-                                                        borderRadius: 4,
-                                                        background: color.dot,
-                                                        flexShrink: 0,
+                                                        width: 4, height: 48, borderRadius: 4,
+                                                        background: color.dot, flexShrink: 0,
                                                     }} />
 
                                                     {/* Main info */}
                                                     <div style={{ flex: 1, minWidth: 0 }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
                                                             {live && (
-                                                                <span className="es-badge-live" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', backgroundColor: 'rgba(244,63,94,0.15)', border: '1px solid rgba(244,63,94,0.3)', borderRadius: '100px', padding: '0.25rem 0.6rem', fontSize: '0.65rem', fontWeight: 700, color: '#fb7185' }}>
-                                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f43f5e', display: 'inline-block', animation: 'pulse-live 1.5s ease-in-out infinite' }} />
-                                  Live
-                                </span>
+                                                                <span style={{
+                                                                    display: 'flex', alignItems: 'center', gap: '0.3rem',
+                                                                    backgroundColor: 'rgba(244,63,94,0.15)',
+                                                                    border: '1px solid rgba(244,63,94,0.3)',
+                                                                    borderRadius: '100px', padding: '0.25rem 0.6rem',
+                                                                    fontSize: '0.65rem', fontWeight: 700, color: '#fb7185',
+                                                                }}>
+                                                                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#f43f5e', display: 'inline-block', animation: 'pulse-live 1.5s ease-in-out infinite' }} />
+                                                                    Live
+                                                                </span>
                                                             )}
                                                             <span style={{ fontSize: '0.72rem', color: color.text, fontWeight: 600 }}>
-                                {session.room}
-                              </span>
-                                                            <span style={{ fontSize: '0.72rem', color: '#475569' }}>
-                                {formatTime(new Date(session.startTime))} – {formatTime(new Date(session.endTime))}
-                              </span>
+                                                                {session.room}
+                                                            </span>
+                                                            <span className="pg-list-time">
+                                                                {formatTime(new Date(session.startTime))} – {formatTime(new Date(session.endTime))}
+                                                            </span>
                                                         </div>
-                                                        <p style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f1f5f9', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                            {session.title}
-                                                        </p>
+                                                        <p className="pg-list-title">{session.title}</p>
                                                         {session.speakers.length > 0 && (
-                                                            <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0.25rem 0 0' }}>
+                                                            <p className="pg-list-speaker">
                                                                 {session.speakers.map((sp) => sp.name).join(' · ')}
                                                             </p>
                                                         )}
@@ -528,14 +544,10 @@ export default function PlanningGrid({ sessions, rooms, eventId }: PlanningGridP
                                                         className="fav-btn"
                                                         onClick={(e) => toggleFavorite(e, session.id)}
                                                         style={{
-                                                            background: 'none',
-                                                            border: 'none',
-                                                            cursor: 'pointer',
+                                                            background: 'none', border: 'none', cursor: 'pointer',
                                                             fontSize: '1.1rem',
-                                                            color: isFav ? '#fbbf24' : '#334155',
-                                                            transition: 'color 0.15s',
-                                                            flexShrink: 0,
-                                                            padding: '4px',
+                                                            color: isFav ? '#fbbf24' : 'var(--es-text-3)',
+                                                            transition: 'color 0.15s', flexShrink: 0, padding: '4px',
                                                         }}
                                                     >
                                                         {isFav ? '★' : '☆'}
