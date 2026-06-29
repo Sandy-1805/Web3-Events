@@ -2,77 +2,104 @@
 'use client';
 
 import { Admin, Resource } from 'react-admin';
-import { useEffect, useState } from 'react';
 import dataProvider from '@/lib/admin/dataProvider';
+import authProvider from '@/lib/admin/authProvider';
+import polyglotI18nProvider from 'ra-i18n-polyglot';
+import englishMessages from 'ra-language-english';
 
-// Ressource : Events
-import { EventList, EventEdit, EventCreate, EventShow } from './ressources/events';
-// Ressource : Speakers
-import { SpeakerList, SpeakerEdit, SpeakerCreate, SpeakerShow } from './ressources/speakers';
-// Ressource : Sessions
-import { SessionList, SessionEdit, SessionCreate, SessionShow } from './ressources/sessions';
-// Ressource : Questions
-import { QuestionList, QuestionShow } from './ressources/questions';
+// ✅ Import des ressources
+import {
+  SessionList,
+  SessionCreate,
+  SessionEdit,
+  SessionShow
+} from './resources/sessions';
 
-const minimalAuthProvider = {
-  login: () => Promise.resolve(),
-  logout: () => { window.location.href = '/'; return Promise.resolve(); },
-  checkAuth: () => Promise.resolve(),
-  checkError: () => Promise.resolve(),
-  getIdentity: () => Promise.resolve({ id: 1, fullName: 'Admin' }),
-  getPermissions: () => Promise.resolve('admin'),
-};
+import {
+  SpeakerList,
+  SpeakerCreate,
+  SpeakerEdit,
+  SpeakerShow
+} from './resources/speakers';
+
+import {
+  EventList,
+  EventCreate,
+  EventEdit,
+  EventShow
+} from './resources/events';
+
+import {
+  QuestionList,
+  QuestionShow
+} from './resources/questions';
+
+import {
+  UserList,
+  UserShow
+} from './resources/users';
+
+// ✅ Créer le provider i18n pour l'anglais
+const i18nProvider = polyglotI18nProvider(() => englishMessages, 'en');
 
 export default function AdminApp() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
   return (
-    <Admin
-      dataProvider={dataProvider}
-      authProvider={minimalAuthProvider}
-      title="EventSync · Administration"
-    >
-      <Resource
-        name="events"
-        options={{ label: 'Événements' }}
-        list={EventList}
-        edit={EventEdit}
-        create={EventCreate}
-        show={EventShow}
-      />
+      <Admin
+          dataProvider={dataProvider}
+          authProvider={authProvider}
+          i18nProvider={i18nProvider}
+          requireAuth
+      >
+        <Resource
+            name="events"
+            list={EventList}
+            create={EventCreate}
+            edit={EventEdit}
+            show={EventShow}
+            recordRepresentation="title"
+            icon={() => <span>📅</span>}
+            options={{ label: 'Events' }}
+        />
 
-      <Resource
-        name="speakers"
-        options={{ label: 'Intervenants' }}
-        list={SpeakerList}
-        edit={SpeakerEdit}
-        create={SpeakerCreate}
-        show={SpeakerShow}
-      />
+        <Resource
+            name="sessions"
+            list={SessionList}
+            create={SessionCreate}
+            edit={SessionEdit}
+            show={SessionShow}
+            recordRepresentation="title"
+            icon={() => <span>⏰</span>}
+            options={{ label: 'Sessions' }}
+        />
 
-      <Resource
-        name="sessions"
-        options={{ label: 'Sessions' }}
-        list={SessionList}
-        edit={SessionEdit}
-        create={SessionCreate}
-        show={SessionShow}
-      />
+        <Resource
+            name="speakers"
+            list={SpeakerList}
+            create={SpeakerCreate}
+            edit={SpeakerEdit}
+            show={SpeakerShow}
+            recordRepresentation="name"
+            icon={() => <span>🎤</span>}
+            options={{ label: 'Speakers' }}
+        />
 
-      <Resource
-        name="questions"
-        options={{ label: 'Questions' }}
-        list={QuestionList}
-        show={QuestionShow}
-      />
-    </Admin>
+        <Resource
+            name="questions"
+            list={QuestionList}
+            show={QuestionShow}
+            recordRepresentation="content"
+            icon={() => <span>💬</span>}
+            options={{ label: 'Questions' }}
+        />
+
+        <Resource
+            name="users"
+            list={UserList}
+            show={UserShow}
+            recordRepresentation="name"
+            icon={() => <span>👥</span>}
+            options={{ label: 'Users' }}
+        />
+      </Admin>
   );
 }
